@@ -1,5 +1,5 @@
 """
-Helpers for reading data
+Helpers for reading data from disk
 
 """
 import pandas as pd
