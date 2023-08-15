@@ -17,7 +17,7 @@ def meal_info(participant_id: str) -> pd.DataFrame:
     p_id = int(participant_id)
 
     # TODO get this from conf
-    path = r"Z:\SEACO data\SEACO-CH20_Smartwatch_data\New_files\combine_csv_file.csv"
+    path = r"/mnt/z/SEACO data/SEACO-CH20_Smartwatch_data/New_files/combine_csv_file.csv"
 
     df = pd.read_csv(path)
     return df[df["p_id"] == p_id]
