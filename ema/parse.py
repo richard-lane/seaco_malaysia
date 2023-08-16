@@ -33,4 +33,21 @@ def extract_meals(
     retval = meal_df[keep]
     print(f"Kept: {util.count_dict(retval.meal_type)}")
 
+    retval.reset_index()
+
     return retval
+
+
+def get_datetime(date: pd.Series, timestamp: pd.Series) -> pd.Series:
+    """
+    Convert date and time to timestamps, using the format in the meals dataframe
+
+    :param date: date in DDMMMYYYY format (29nov2021)
+    :param timestamp: time in HH:mm::SS format (16:12:10)
+
+    :returns: series of pandas timestamp objects
+
+    """
+    date_and_time = date + timestamp
+
+    return pd.to_datetime(date_and_time, format=r"%d%b%Y%H:%M:%S")
