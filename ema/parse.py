@@ -5,6 +5,8 @@ Helper functions for parsing, cleaning data etc.
 import pandas as pd
 import numpy as np
 
+from tqdm import tqdm
+
 from . import util
 
 
@@ -38,7 +40,7 @@ def extract_meals(
     return retval
 
 
-def get_datetime(date: pd.Series, timestamp: pd.Series) -> pd.Series:
+def get_meal_datetime(date: pd.Series, timestamp: pd.Series) -> pd.Series:
     """
     Convert date and time to timestamps, using the format in the meals dataframe
 
@@ -51,3 +53,27 @@ def get_datetime(date: pd.Series, timestamp: pd.Series) -> pd.Series:
     date_and_time = date + timestamp
 
     return pd.to_datetime(date_and_time, format=r"%d%b%Y%H:%M:%S")
+
+
+def keep_nearby(
+    input_times: pd.Series, low_times: pd.Series, high_times: pd.Series
+) -> pd.DataFrame:
+    """
+    Return a mask where input_times is between low_times and high_times
+
+    :param input_times: input array of times to query, as pd.datetime64
+    :param low_times: the lower edge of each time range, as pd.datetime64
+    :param high_times: the upper edge of each time range, as pd.datetime64
+
+    :returns: boolean array of which input_times are between the vals in low_times and high_times
+
+    """
+    assert len(low_times) == len(high_times)
+    included = np.zeros(len(input_times), dtype=np.bool_)
+
+    for low_t, high_t in tqdm(
+        zip(low_times.values, high_times.values), total=len(low_times)
+    ):
+        included |= input_times.between(low_t, high_t)
+
+    return included
