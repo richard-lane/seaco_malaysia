@@ -2,7 +2,9 @@
 Helpers for reading data from disk
 
 """
+import yaml
 import pathlib
+from functools import cache
 
 import pandas as pd
 from openmovement.load import CwaData
@@ -18,30 +20,62 @@ def _data_dir() -> pathlib.Path:
     return pathlib.Path(__file__).parents[1] / "data"
 
 
+def _userconf() -> dict:
+    """
+    User defined configuration
+
+    """
+    with open(
+        pathlib.Path(__file__).resolve().parents[1] / "userconf.yaml", "r"
+    ) as stream:
+        return yaml.safe_load(stream)
+
+
+def _conf() -> dict:
+    """
+    Hard coded stuff
+
+    """
+    with open(
+        pathlib.Path(__file__).resolve().parents[1] / "config.yaml", "r"
+    ) as stream:
+        return yaml.safe_load(stream)
+
+
+@cache
 def _qnaire_df() -> pd.DataFrame:
-    """ """
+    """
+    Read the questionnaire dataframe
+
+    """
+    path = pathlib.Path(_userconf()["drive"]) / _conf()["questionnaire"]
+
+    return pd.read_csv(path)
 
 
 def consented(residents_id: str) -> bool:
     """
-    Whether a participant consented
+    Whether a participant consented, based on the questionnaire answer
 
     """
     # Read in the file of questionnaire information
     qnaire_responses = _qnaire_df()
 
+    r_id = int(residents_id)
+
     # Check that this value is in the df
-    if residents_id not in qnaire_responses["residents_id"]:
+    if r_id not in qnaire_responses["residents_id"].values:
         raise ValueError(f"{residents_id} not found in questionnaire responses")
 
     # Check that the participant consented
     # i.e. that the status is 1
+    # im tired so this is bad
     return (
         qnaire_responses.loc[
-            qnaire_responses["residents_id"] == residents_id, "respondent_status"
-        ]
-        == 1
-    )
+            qnaire_responses["residents_id"] == r_id, "respondent_status"
+        ].values
+        == [1]
+    ).all()
 
 
 def accel_filepath(
