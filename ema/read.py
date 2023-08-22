@@ -18,6 +18,32 @@ def _data_dir() -> pathlib.Path:
     return pathlib.Path(__file__).parents[1] / "data"
 
 
+def _qnaire_df() -> pd.DataFrame:
+    """ """
+
+
+def consented(residents_id: str) -> bool:
+    """
+    Whether a participant consented
+
+    """
+    # Read in the file of questionnaire information
+    qnaire_responses = _qnaire_df()
+
+    # Check that this value is in the df
+    if residents_id not in qnaire_responses["residents_id"]:
+        raise ValueError(f"{residents_id} not found in questionnaire responses")
+
+    # Check that the participant consented
+    # i.e. that the status is 1
+    return (
+        qnaire_responses.loc[
+            qnaire_responses["residents_id"] == residents_id, "respondent_status"
+        ]
+        == 1
+    )
+
+
 def accel_filepath(
     device_id: str, recording_id: str, participant_id: str
 ) -> pathlib.Path:
@@ -59,7 +85,9 @@ def meal_info(participant_id: str) -> pd.DataFrame:
     p_id = int(participant_id)
 
     # TODO get this from conf
-    path = r"/mnt/z/SEACO data/SEACO-CH20_Smartwatch_data/New_files/combine_csv_file.csv"
+    path = (
+        r"/mnt/z/SEACO data/SEACO-CH20_Smartwatch_data/New_files/combine_csv_file.csv"
+    )
 
     df = pd.read_csv(path)
     return df[df["p_id"] == p_id]
