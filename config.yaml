@@ -1,0 +1,4 @@
+# These live on RDSF
+- ax6_dir: "SEACO data/Downloads/AX6 Activity Monitor"
+- partiicpant_data: "SEACO data/SEACO-CH20 qnaire data/SEACO_CH20_17082022_de_id.csv"
+- meal_info: "SEACO data/SEACO-CH20_Smartwatch_data/New_files/combine_csv_file.csv"
