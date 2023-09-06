@@ -20,6 +20,7 @@ def _data_dir() -> pathlib.Path:
     return pathlib.Path(__file__).parents[1] / "data"
 
 
+@cache
 def _userconf() -> dict:
     """
     User defined configuration
@@ -31,6 +32,7 @@ def _userconf() -> dict:
         return yaml.safe_load(stream)
 
 
+@cache
 def _conf() -> dict:
     """
     Hard coded stuff
@@ -48,7 +50,7 @@ def _qnaire_df() -> pd.DataFrame:
     Read the questionnaire dataframe
 
     """
-    path = pathlib.Path(_userconf()["drive"]) / _conf()["questionnaire"]
+    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["questionnaire"]
 
     return pd.read_csv(path)
 
@@ -118,10 +120,7 @@ def meal_info(participant_id: str) -> pd.DataFrame:
     """
     p_id = int(participant_id)
 
-    # TODO get this from conf
-    path = (
-        r"/mnt/z/SEACO data/SEACO-CH20_Smartwatch_data/New_files/combine_csv_file.csv"
-    )
+    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["meal_info"]
 
     df = pd.read_csv(path)
     return df[df["p_id"] == p_id]

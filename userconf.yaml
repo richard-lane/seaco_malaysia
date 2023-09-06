@@ -1,2 +1,5 @@
-# Drive where the SEACO data is mounted
-drive: "Z:"
+# The location of the SEACO files (i.e. your RDSF mount)
+# If you're on Windows and have mounted this on Z:, it will just be "Z:"
+# If you're on WSL and have mounted it on Z:, it will be "/mnt/z/"
+# If you're on Linux, it will be something else
+seaco_dir: "/mnt/z/"
