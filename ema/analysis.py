@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from scipy.signal import convolve
+from scipy import integrate as sciint
 
 
 def moving_avg(array: np.ndarray, width: int):
@@ -35,3 +36,23 @@ def magnitude(accel_df: pd.DataFrame) -> np.ndarray:
         + accel_df["accel_y"] ** 2
         + (accel_df["accel_z"] - 1) ** 2
     )
+
+
+def smooth(pts: np.ndarray, width: int):
+    """
+    Smooth an array of points using the given window
+
+    :param pts: array of time series points to smooth
+    :param width: width of window/kernel to use
+    :returns: smoothed array same shape as pts
+
+    """
+    return np.convolve(pts, np.ones(width), "same") / width
+
+
+def integrate(y: np.ndarray, dx) -> np.ndarray:
+    """
+    Approximate numerical integral
+
+    """
+    return sciint.cumtrapz(y, initial=0, dx=dx)

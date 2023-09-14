@@ -3,8 +3,9 @@ General utility functions
 
 """
 import numpy as np
-from scipy import integrate as sciint
 
+# How often the accelerometer took a measurement
+SAMPLE_RATE_HZ = 100
 
 def count_dict(array: np.ndarray) -> dict:
     """
@@ -16,11 +17,3 @@ def count_dict(array: np.ndarray) -> dict:
 
     """
     return dict(zip(*np.unique(array, return_counts=True)))
-
-
-def integrate(y: np.ndarray, dx) -> np.ndarray: 
-    """
-    Approximate numerical integral
-
-    """
-    return sciint.cumtrapz(y, initial=0, dx=dx)
