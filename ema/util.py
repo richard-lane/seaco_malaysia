@@ -3,7 +3,7 @@ General utility functions
 
 """
 import numpy as np
-from scipy.integrate import cumtrapz
+from scipy import integrate as sciint
 
 
 def count_dict(array: np.ndarray) -> dict:
@@ -23,4 +23,4 @@ def integrate(y: np.ndarray, dx) -> np.ndarray:
     Approximate numerical integral
 
     """
-    return cumtrapz(y, initial=0, dx=dx)
+    return sciint.cumtrapz(y, initial=0, dx=dx)
