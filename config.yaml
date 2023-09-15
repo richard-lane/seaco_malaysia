@@ -1,6 +1,7 @@
 # You probably shouldn't change this file
 # User-defined config is in userconf.yaml
 
+# ==== Filepaths
 # These live on RDSF
 ax6_dir: "SEACO data/Downloads/AX6 Activity Monitor"
 questionnaire: "SEACO data/SEACO-CH20 qnaire data/SEACO_CH20_17082022_de_id.csv"

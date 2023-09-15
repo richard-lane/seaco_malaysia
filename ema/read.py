@@ -9,6 +9,8 @@ from functools import cache
 import pandas as pd
 from openmovement.load import CwaData
 
+from . import util
+
 
 def _data_dir() -> pathlib.Path:
     """
@@ -100,11 +102,11 @@ def accel_filepath(
     assert len(str(recording_id)) == 10
 
     # Check that the participant agreed to take part in the study
-    # Do this by opening "Z:\SEACO data\SEACO-CH20 qnaire data\SEACO_CH20_17082022_de_id.csv"
+    # Do this by opening "SEACO data\SEACO-CH20 qnaire data\SEACO_CH20_17082022_de_id.csv"
     # as a dataframe, finding the row with participant_id = df["residents_id"] and checking
     # that the value of "respondent_status" here == 1
-    # I've checked the one above by hand and it's fine
-    assert participant_id == "20029"
+    if not consented(participant_id):
+        raise ValueError(f"Participant {participant_id} didn't consent")
 
     filename = f"{device_id}_{recording_id}-{participant_id}.cwa"
     return _data_dir() / filename
@@ -140,4 +142,12 @@ def accel_info(filepath: str) -> pd.DataFrame:
 
     """
     with CwaData(filepath, include_accel=True, include_gyro=True) as cwa_data:
-        return cwa_data.get_samples()
+        retval = cwa_data.get_samples()
+
+    retval.set_index("time", inplace=True, verify_integrity=False)
+
+    # Convert from g to m/s
+    for x in "xyz":
+        retval[f"accel_{x}"] = retval[f"accel_{x}"] * util.GRAVITY_MS2
+
+    return retval

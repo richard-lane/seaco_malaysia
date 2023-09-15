@@ -4,6 +4,12 @@ General utility functions
 """
 import numpy as np
 
+# How often the accelerometer took a measurement
+SAMPLE_RATE_HZ = 100
+
+# Gravity
+GRAVITY_MS2 = 9.81
+
 
 def count_dict(array: np.ndarray) -> dict:
     """
