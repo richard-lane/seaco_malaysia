@@ -38,18 +38,6 @@ def magnitude(accel_df: pd.DataFrame) -> np.ndarray:
     )
 
 
-def smooth(pts: np.ndarray, width: int):
-    """
-    Smooth an array of points using the given window
-
-    :param pts: array of time series points to smooth
-    :param width: width of window/kernel to use
-    :returns: smoothed array same shape as pts
-
-    """
-    return np.convolve(pts, np.ones(width), "same") / width
-
-
 def integrate(y: np.ndarray, dx) -> np.ndarray:
     """
     Approximate numerical integral
