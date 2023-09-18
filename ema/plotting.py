@@ -11,7 +11,7 @@ def plot_integrals(
     points: tuple[np.ndarray, np.ndarray, np.ndarray],
     *,
     fig=None,
-    **kwargs
+    **kwargs,
 ) -> tuple[plt.Figure, plt.Axes]:
     """
     Plot a figure showing acceleration and its first two integrals (velocity and displacement)
@@ -29,17 +29,17 @@ def plot_integrals(
     else:
         axes = fig.axes
 
-    # Integrate to get the velocity / position
-    accel, vely, posn = points
-
     if "color" not in kwargs:
         kwargs["color"] = "k"
 
     if "linewidth" not in kwargs:
         kwargs["linewidth"] = 0.5
 
-    for axis, data, label in zip(axes, points, ["Accel", "Vely", "Posn"]):
-        axis.axhline(0, linewidth=0.5, color="r", linestyle="--")
+    for axis, data, label in zip(
+        axes, points, [r"Accel / m/s$^{-2}$", r"Vely / ms$^{-1}$", r"Posn / m"]
+    ):
+        axis.axhline(0, linewidth=0.5, color="k", linestyle="--")
+
         axis.set_ylabel(label)
 
-        axis.plot(times, data, **kwargs)  # he he locals
+        axis.plot(times, data, **kwargs)

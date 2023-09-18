@@ -10,16 +10,17 @@ from scipy import signal
 from . import util
 
 
-def convolve_rectangle(pts: np.ndarray, width: int) -> np.ndarray:
+def convolve_rectangle(pts: pd.Series, width: int) -> pd.Series:
     """
-    Smooth an array of points using the given window
+    Smooth a series of points using the given window
 
     :param pts: array of time series points to smooth
     :param width: width of window/kernel to use
     :returns: smoothed array same shape as pts
 
     """
-    return np.convolve(pts, np.ones(width), "same") / width
+    avg = np.convolve(pts, np.ones(width), "same") / width
+    return pd.Series(data=pts - avg, index=pts.index)
 
 
 def moving_avg(pts: pd.Series, width: int) -> pd.Series:
@@ -34,41 +35,29 @@ def moving_avg(pts: pd.Series, width: int) -> pd.Series:
 
     """
     # Use the median because large outliers are likely real signal
-    return pts.rolling(window=width, min_periods=1).median()
+    avg = pts.rolling(window=width, min_periods=1).median()
+
+    return pd.Series(data=pts - avg, index=pts.index)
 
 
-def remove_low_freqs(pts: np.ndarray, *, method="convolve", width=None) -> np.ndarray:
+def highpass_filter(
+    pts: pd.Series,
+    *,
+    order: int,
+    critical_freq: float,
+) -> pd.Series:
     """
-    Remove the slowly-varying part part of a time series
+    Remove low frequencies using a high-pass filter
 
-    Either smooths the time series ("convolve" or "moving avg") then removes this from the
-    series, or uses a high-pass filter to remove
+    :param pts: time series values
 
-    :param pts: array of points
-    :param width: width of window/kernel to use in the case of "convolve" or "moving avg".
-                  Must be specified in these cases.
-    :param method: "convolve", "filter" or "moving avg"
-    TODO add new parameters for the FFT version
-
-    :returns: an array with the same shape as pts, with the slow frequency part removed
+    :returns: an array with the same shape as pts, with the low frequency part removed
 
     """
-    if method not in {"convolve", "moving avg", "filter"}:
-        raise ValueError(f"Invalid method specified: {method}")
+    filter = signal.butter(
+        N=order, Wn=critical_freq, btype="hp", fs=util.SAMPLE_RATE_HZ, output="sos"
+    )
 
-    if method == "filter":
-        # TODO un hard code
-        filter = signal.butter(2, 1, "hp", fs=util.SAMPLE_RATE_HZ, output="sos")
-        filtered = signal.sosfilt(filter, pts)
+    filtered = signal.sosfilt(filter, pts)
 
-        return filtered
-
-    # Default moving average window width of 10 points (0.1s)
-    if width is None:
-        width = 10
-
-    # Take the moving average, using the appropriate algorithm
-    avg_fcn = moving_avg if method == "moving avg" else convolve_rectangle
-    smoothed = avg_fcn(pts, width)
-
-    return pts - smoothed
+    return pd.Series(data=filtered, index=pts.index)

@@ -26,9 +26,9 @@ def magnitude(accel_df: pd.DataFrame) -> np.ndarray:
     )
 
 
-def integrate(y: np.ndarray, dx) -> np.ndarray:
+def integrate(y: pd.Series, dx: float) -> pd.Series:
     """
     Approximate numerical integral
 
     """
-    return sciint.cumtrapz(y, initial=0, dx=dx)
+    return pd.Series(data=sciint.cumtrapz(y, initial=0, dx=dx), index=y.index)
