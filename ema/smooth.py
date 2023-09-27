@@ -61,3 +61,28 @@ def highpass_filter(
     filtered = signal.sosfilt(filter, pts)
 
     return pd.Series(data=filtered, index=pts.index)
+
+
+def bandpass_filter(
+    pts: pd.Series,
+    *,
+    order: int,
+    critical_freqs: tuple[float, float] = (0.6, 2.5),
+) -> pd.Series:
+    """
+    Remove low and high frequencies using a high-pass filter
+
+    :param pts: time series values
+
+    :returns: an array with the same shape as pts, with the low frequency part removed
+
+    """
+    assert len(critical_freqs) == 2
+
+    filter = signal.butter(
+        N=order, Wn=critical_freqs, btype="bandpass", fs=util.SAMPLE_RATE_HZ, output="sos"
+    )
+
+    filtered = signal.sosfilt(filter, pts)
+
+    return pd.Series(data=filtered, index=pts.index)

@@ -9,7 +9,7 @@ from functools import cache
 import pandas as pd
 from openmovement.load import CwaData
 
-from . import util
+from . import util, parse
 
 
 def _data_dir() -> pathlib.Path:
@@ -151,3 +151,60 @@ def accel_info(filepath: str) -> pd.DataFrame:
         retval[f"accel_{x}"] = retval[f"accel_{x}"] * util.GRAVITY_MS2
 
     return retval
+
+
+def accel_filepath(
+    device_id: str, recording_id: str, participant_id: str
+) -> pathlib.Path:
+    """
+    Assumes in the data/ dir
+    """
+    filename = f"{device_id}_{recording_id}-{participant_id}.cwa"
+    filepath = pathlib.Path(rf"data/{filename}")
+
+    # TODO if reading straight from RDSF, add some code to look for the right files in all the "Week X" folders
+
+    assert filepath.exists()
+
+    return filepath
+
+
+def get_participant_meal(
+    device_id: str,
+    recording_id: str,
+    participant_id: str,
+    meal_no: int,
+) -> pd.DataFrame:
+    """
+    Get the accelerometer information from an hour preceding the provided meal for the given participant
+
+    :param device_id: 7-digit device ID
+    :param recording_id: 10-digit device ID
+    :param participant_id: 5-digit participant ID
+    :param meal_no: which meal to take the accelerometer information from
+
+    :raises ValueError: if the participant did not consent
+    :raises ValueError: if the participant file doesn't exist
+    :returns: a dataframe holding the accelerometer information for the hour. Uses time as the index
+
+    """
+    # Get the whole dataframe
+    samples = accel_info(str(accel_filepath(device_id, recording_id, participant_id)))
+
+    # Slice the right meal
+    # TODO refactor this cus its bad, i cba rn
+    meal_df = meal_info(participant_id)
+    allowed_meal_types = {"Snack", "Drink", "Meal", "No food/drink"}
+    meal_df = parse.extract_meals(meal_df, allowed_meal_types, verbose=True)
+
+    # Find meal times
+    meal_times = meal_df["date"].map(str) + meal_df["timestamp"]
+
+    # Find an hour slot before each meal
+    ends = pd.to_datetime(meal_times, format=r"%d%b%Y%H:%M:%S")
+    starts = ends - pd.Timedelta(1, "hour")
+
+    start, end = starts.iloc[meal_no], ends.iloc[meal_no]
+
+    # Copy so the original df doesn't have to be held in memory
+    return samples[start:end].copy()
