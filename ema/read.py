@@ -208,3 +208,20 @@ def get_participant_meal(
 
     # Copy so the original df doesn't have to be held in memory
     return samples[start:end].copy()
+
+
+def income_data() -> pd.DataFrame:
+    """
+    Get household income data 
+
+    Hold information about survey responses relating to household income; the codebook
+    can be found on RDSF (and maybe I'll write a function to grab a dict of encoded answers)
+
+
+    :returns: dataframe holding survey responses
+
+    """
+    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["income_info"]
+
+    return pd.read_csv(path)
+
