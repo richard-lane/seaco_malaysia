@@ -212,7 +212,7 @@ def get_participant_meal(
 
 def income_data() -> pd.DataFrame:
     """
-    Get household income data 
+    Get household income data
 
     Hold information about survey responses relating to household income; the codebook
     can be found on RDSF (and maybe I'll write a function to grab a dict of encoded answers)
@@ -225,3 +225,41 @@ def income_data() -> pd.DataFrame:
 
     return pd.read_csv(path)
 
+
+def income_codebook() -> dict:
+    """
+    Dict of dicts for the answers to each question
+
+    """
+    # Parsed from the income codebook
+    return {
+        "income 1": {-9: "Refused to answer", -8: "Don't Know", 1: "Yes", 2: "No"},
+        "income 2": {-9: "Refused to answer", -8: "Don't Know", 1: "Yes", 2: "No"},
+        "income 3": {-9: "Refused to answer", -8: "Don't Know", 1: "Yes", 2: "No"},
+        "income 4": {-9: "Refused to answer", -8: "Don't Know", 1: "Yes", 2: "No"},
+        "income 5": {
+            -9: "Refused to answer",
+            1: 0,
+            2: 1,
+            3: 2,
+            4: 3,
+            5: 4,
+            6: 5,
+            7: 6,
+            8: 7,
+            9: 8,
+            10: 9,
+            11: 10,
+        },
+        "income 6": {
+            -9: "Refused to answer",
+            -8: "Don't Know",
+            1: "Less than RM 1,000 per month",
+            2: "RM 1,000 - RM 1,999",
+            3: "RM 2,000 - RM 2,999",
+            4: "RM 3,000 - RM 3,999",
+            5: "RM 4,000 - RM 4,999",
+            6: "RM 5,000 - RM 5,999",
+            7: "RM 6,000 and above",
+        },
+    }
