@@ -308,3 +308,11 @@ def qnaire_status_codebook() -> dict:
         5: "Passed away",
         6: "Exclude",
     }
+
+
+def qnaire_sex_codebook() -> dict():
+    """
+    Lookup of response status -> response for the "respondent_sex" question
+
+    """
+    return {1.0: "Male", 2.0: "Female"}
