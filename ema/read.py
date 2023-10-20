@@ -316,3 +316,18 @@ def qnaire_sex_codebook() -> dict():
 
     """
     return {1.0: "Male", 2.0: "Female"}
+
+
+def qnaire_ethnicity_codebook() -> dict():
+    """
+    Lookup of response status -> readable ethnicity
+
+    It's not easy to find what these are in the codebook, so I've left them as numbers
+
+    """
+    return {
+        1.0: "E1",
+        2.0: "E2",
+        3.0: "E3",
+        5.0: "E4",
+    }
