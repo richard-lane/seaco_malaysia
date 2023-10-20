@@ -209,7 +209,7 @@ def get_participant_meal(
     # Copy so the original df doesn't have to be held in memory
     return samples[start:end].copy()
 
-
+@cache
 def income_data() -> pd.DataFrame:
     """
     Get household income data
