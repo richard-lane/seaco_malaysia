@@ -230,14 +230,41 @@ def income_codebook() -> dict:
     """
     Dict of dicts for the answers to each question
 
+    5 and 6 are in a weird order in the codebook - maybe they were swapped in the survey?
+
     """
     # Parsed from the income codebook
     return {
-        "income 1": {-9: "Refused to answer", -8: "Don't Know", 1: "Yes", 2: "No"},
-        "income 2": {-9: "Refused to answer", -8: "Don't Know", 1: "Yes", 2: "No"},
-        "income 3": {-9: "Refused to answer", -8: "Don't Know", 1: "Yes", 2: "No"},
-        "income 4": {-9: "Refused to answer", -8: "Don't Know", 1: "Yes", 2: "No"},
-        "income 5": {
+        "income_1": {
+            "q": "In the last 12 months did the household have enough money to make ends meet?",
+            -9: "Refused to answer",
+            -8: "Don't Know",
+            1: "Yes",
+            2: "No",
+        },
+        "income_2": {
+            "q": "38. In the last week did anyone in the household go hungry because there was not",
+            -9: "Refused to answer",
+            -8: "Don't Know",
+            1: "Yes",
+            2: "No",
+        },
+        "income_3": {
+            "q": "39. In the last 12 months, did anyone in the household fail to receive needed me",
+            -9: "Refused to answer",
+            -8: "Don't Know",
+            1: "Yes",
+            2: "No",
+        },
+        "income_4": {
+            "q": "40. In an emergency, could the household raise RM2,000 in 24 hours?",
+            -9: "Refused to answer",
+            -8: "Don't Know",
+            1: "Yes",
+            2: "No",
+        },
+        "income_5": {
+            "q": "42. Please define how well off is your economic status.",
             -9: "Refused to answer",
             1: 0,
             2: 1,
@@ -251,7 +278,8 @@ def income_codebook() -> dict:
             10: 9,
             11: 10,
         },
-        "income 6": {
+        "income_6": {
+            "q": "41. Which category best describes the household's monthly income?",
             -9: "Refused to answer",
             -8: "Don't Know",
             1: "Less than RM 1,000 per month",
