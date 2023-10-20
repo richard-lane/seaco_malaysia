@@ -291,3 +291,20 @@ def income_codebook() -> dict:
             7: "RM 6,000 and above",
         },
     }
+
+
+def qnaire_status_codebook() -> dict:
+    """
+    Lookup of response status -> response for the "respondent_status" question
+
+    :returns: dict mapping number to string response
+
+    """
+    return {
+        1: "Agree",
+        2: "Disagree",
+        3: "Not at Home (Uncontactable)",
+        4: "Empty/ Moved",
+        5: "Passed away",
+        6: "Exclude",
+    }
