@@ -209,6 +209,7 @@ def get_participant_meal(
     # Copy so the original df doesn't have to be held in memory
     return samples[start:end].copy()
 
+
 @cache
 def income_data() -> pd.DataFrame:
     """
@@ -331,3 +332,12 @@ def qnaire_ethnicity_codebook() -> dict():
         3.0: "E3",
         5.0: "E4",
     }
+
+
+def smartwatch_feasibility() -> pd.DataFrame:
+    """
+    Get a dataframe of smartwatch feasibility data
+
+    """
+    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["feasibility_info"]
+    return pd.read_stata(path)
