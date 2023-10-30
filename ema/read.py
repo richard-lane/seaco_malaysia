@@ -112,6 +112,16 @@ def accel_filepath(
     return _data_dir() / filename
 
 
+@cache
+def all_meal_info() -> pd.DataFrame:
+    """
+    Get smartwatch meal info from the smartwatch data
+
+    """
+    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["meal_info"]
+    return pd.read_csv(path)
+
+
 def meal_info(participant_id: str) -> pd.DataFrame:
     """
     Get smartwatch meal info from the smartwatch data
@@ -121,11 +131,9 @@ def meal_info(participant_id: str) -> pd.DataFrame:
 
     """
     p_id = int(participant_id)
+    all_meals = all_meal_info()
 
-    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["meal_info"]
-
-    df = pd.read_csv(path)
-    return df[df["p_id"] == p_id]
+    return all_meals[all_meals["p_id"] == p_id]
 
 
 def accel_info(filepath: str) -> pd.DataFrame:
@@ -362,4 +370,3 @@ def full_codebook() -> pd.DataFrame:
     """
     path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["qnaire_codebook"]
     return pd.read_excel(path, sheet_name="Sheet1")
-
