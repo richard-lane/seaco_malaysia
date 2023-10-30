@@ -352,3 +352,14 @@ def full_questionnaire() -> pd.DataFrame:
     """
     path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["full_questionnaire"]
     return pd.read_stata(path)
+
+
+@cache
+def full_codebook() -> pd.DataFrame:
+    """
+    Get a dataframe of the full questionnaire codebook
+
+    """
+    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["qnaire_codebook"]
+    return pd.read_excel(path, sheet_name="Sheet1")
+
