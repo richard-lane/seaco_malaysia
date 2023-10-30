@@ -9,3 +9,4 @@ meal_info: "SEACO data/SEACO-CH20_Smartwatch_data/New_files/combine_csv_file.csv
 income_info: "SEACO data/Household income data/ch20_household.csv"
 income_codebook: "SEACO data/Household income data/codebook_ch20_household.xlsx"
 feasibility_info: "SEACO data/Stata Datasets/SEACO-CH20 smartwatch feasibility- for LJ.dta"
+full_questionnaire: "SEACO data/SEACO-CH20 qnaire data/SEACO-CH20 qnaire.dta"

@@ -334,10 +334,21 @@ def qnaire_ethnicity_codebook() -> dict():
     }
 
 
+@cache
 def smartwatch_feasibility() -> pd.DataFrame:
     """
     Get a dataframe of smartwatch feasibility data
 
     """
     path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["feasibility_info"]
+    return pd.read_stata(path)
+
+
+@cache
+def full_questionnaire() -> pd.DataFrame:
+    """
+    Get a dataframe of the full questionnaire data
+
+    """
+    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["full_questionnaire"]
     return pd.read_stata(path)
