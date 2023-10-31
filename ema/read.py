@@ -117,9 +117,22 @@ def all_meal_info() -> pd.DataFrame:
     """
     Get smartwatch meal info from the smartwatch data
 
+    :returns: dataframe where the date and timestamp are combined into a single column and set as the index
+
     """
     path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["meal_info"]
-    return pd.read_csv(path)
+    retval = pd.read_csv(path)
+
+    # Find a series representing the timestamp
+    retval["Datetime"] = pd.to_datetime(
+        retval["date"].map(str) + retval["timestamp"], format=r"%d%b%Y%H:%M:%S"
+    )
+
+    # Remove the old date/time columns
+    retval = retval.drop(["date", "timestamp"], axis=1)
+
+    # Set it as the index + return
+    return retval.set_index("Datetime")
 
 
 def meal_info(participant_id: str) -> pd.DataFrame:
