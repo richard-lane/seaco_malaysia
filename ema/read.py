@@ -408,8 +408,32 @@ def ramadan_df(*, dataframe: pd.DataFrame, keep: bool) -> pd.DataFrame:
     """
 
 
-def has_collection_date(participant_ids: pd.Series) -> pd.Series:
+def no_collection_date(participant_ids: pd.Series) -> set:
     """
     Find whether a collection date was given for each participant
 
+    :param participant_ids: series of participant IDs
+    :returns: set of participants for whom no collection date was given
+
     """
+    feasibility_info = smartwatch_feasibility()
+
+    # Check none of the provided participant IDs aren't in the feasibility info
+    assert participant_ids.isin(
+        feasibility_info["residents_id"]
+    ).all(), "Provided participant ID not in the list of possible residents IDs"
+
+    # Slice the feasibility info to only include the participants we're interested in
+    feasibility_info = feasibility_info[
+        feasibility_info["residents_id"].isin(participant_ids)
+    ]
+
+    # Could check that for all the provided participants, if collection date is not provided
+    # then neither watch or AX collection date are provided either
+
+    # Check whether the collection date is null for each participant
+    return set(
+        feasibility_info["residents_id"][
+            pd.isnull(feasibility_info["collectiondate_actual"])
+        ]
+    )
