@@ -383,3 +383,33 @@ def full_codebook() -> pd.DataFrame:
     """
     path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["qnaire_codebook"]
     return pd.read_excel(path, sheet_name="Sheet1")
+
+
+def in_ramadan(dates: pd.Series) -> pd.Series:
+    """
+    Boolean mask indicating whether a series of datetimes (in 2022) are within ramadan
+
+    :param dates: series of datetimes, all must be in 2022
+
+    """
+    # Check that the dates are all in 2022
+    # Check whether they're in 2022 ramadan
+
+
+def ramadan_df(*, dataframe: pd.DataFrame, keep: bool) -> pd.DataFrame:
+    """
+    Get a copy of a dataframe containing only/none of the dates in ramadan
+
+    :param dataframe: must be indexed by datetime
+    :param keep: whether to keep (True) or remove (False) the ramadan dates
+
+    :returns: a copy of the dataframe
+
+    """
+
+
+def has_collection_date(participant_ids: pd.Series) -> pd.Series:
+    """
+    Find whether a collection date was given for each participant
+
+    """
