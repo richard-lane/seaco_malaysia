@@ -4,6 +4,7 @@ Helpers for reading data from disk
 """
 import yaml
 import pathlib
+import warnings
 from functools import cache
 
 import pandas as pd
@@ -385,15 +386,29 @@ def full_codebook() -> pd.DataFrame:
     return pd.read_excel(path, sheet_name="Sheet1")
 
 
-def in_ramadan(dates: pd.Series) -> pd.Series:
+def ramadan_2022() -> pd.Series:
     """
-    Boolean mask indicating whether a series of datetimes (in 2022) are within ramadan
-
-    :param dates: series of datetimes, all must be in 2022
+    Ramadan dates
 
     """
-    # Check that the dates are all in 2022
+    return pd.to_datetime(["2022-04-02", "2022-05-02"])
+
+
+def in_ramadan_2022(dates: pd.Series) -> pd.Series:
+    """
+    Boolean mask indicating whether a series of datetimes are n ramadan
+
+    :param dates: series of datetimes
+    :raises: warning if the dates are not all in 2022
+
+    """
+    # Check if the dates are all in 2022
+    if set(dates.year.unique()) != {2022}:
+        warnings.warn(f"Not all dates are in 2022: {set(dates.year.unique())=} ")
+
     # Check whether they're in 2022 ramadan
+    start, end = ramadan_2022()
+    return (start <= dates) & (dates <= end)
 
 
 def ramadan_df(*, dataframe: pd.DataFrame, keep: bool) -> pd.DataFrame:
