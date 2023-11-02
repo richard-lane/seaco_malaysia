@@ -411,9 +411,9 @@ def in_ramadan_2022(dates: pd.Series) -> pd.Series:
     return (start <= dates) & (dates <= end)
 
 
-def ramadan_df(*, dataframe: pd.DataFrame, keep: bool) -> pd.DataFrame:
+def ramadan22_df(dataframe: pd.DataFrame, *, keep: bool) -> pd.DataFrame:
     """
-    Get a copy of a dataframe containing only/none of the dates in ramadan
+    Get a copy of a dataframe containing only/none of the dates in ramadan 2022
 
     :param dataframe: must be indexed by datetime
     :param keep: whether to keep (True) or remove (False) the ramadan dates
@@ -421,6 +421,9 @@ def ramadan_df(*, dataframe: pd.DataFrame, keep: bool) -> pd.DataFrame:
     :returns: a copy of the dataframe
 
     """
+    in_ramadan = in_ramadan_2022(dataframe.index)
+
+    return dataframe[in_ramadan].copy() if keep else dataframe[~in_ramadan].copy()
 
 
 def no_collection_date(participant_ids: pd.Series) -> set:
