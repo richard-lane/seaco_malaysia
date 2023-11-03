@@ -133,12 +133,15 @@ def all_meal_info() -> pd.DataFrame:
     retval = retval.drop(["date", "timestamp"], axis=1)
 
     # Set it as the index + return
-    return retval.set_index("Datetime")
+    retval = retval.set_index("Datetime")
+
+    # Sort by index
+    return retval.sort_index()
 
 
 def meal_info(participant_id: str) -> pd.DataFrame:
     """
-    Get smartwatch meal info from the smartwatch data
+    Get smartwatch meal info for a single participant from the smartwatch data
 
     :param participant_id: ID of participant
     :returns: dataframe
