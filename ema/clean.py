@@ -42,7 +42,7 @@ def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> np.ndarray:
 def cleaned_smartwatch() -> pd.DataFrame:
     """
     Return a dataframe of meal time info that has:
-        - had duplicates removed
+        - had duplicates removed (as defined above)
         - had events before the participant watch distribution date removed
         - had events on the watch distribution date removed
 
