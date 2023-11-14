@@ -104,7 +104,7 @@ def entry_time_hist(
 def participant_entries_per_day(
     meal_info: pd.DataFrame,
     fig_ax: tuple = None,
-):
+) -> tuple[plt.Figure, plt.Axes, dict[int, tuple[pd.Series, list]]]:
     """
     Plot a line graph showing how many entries each participant made per day
 
@@ -119,9 +119,51 @@ def participant_entries_per_day(
     # Get the dates and number of entries for each participant
     participant_entries = analysis.find_participant_entries(meal_info)
 
-    # Sort by value here
-    plot_kw = {"color": None, "alpha": 0.25, "marker": ".", "linestyle": "-"}
-    for (dates, entries) in participant_entries.values():
+    plot_kw = {
+        "color": "k",
+        "alpha": 0.25,
+        "marker": ".",
+        "linestyle": "-",
+        "linewidth": 0.5,
+    }
+    for dates, entries in participant_entries.values():
         axis.plot(dates, entries, **plot_kw)
 
     return fig, axis, participant_entries
+
+
+def participant_entries_histogram(
+    meal_info: pd.DataFrame, fig_ax: tuple = None
+) -> tuple[plt.Figure, plt.Axes, int]:
+    """
+    Plot a histogram showing the number of entries per day per participant
+
+    :param meal_info: smartwatch entries dataframe
+    :param fig_ax: optional figure and axis to plot on; creates a new figure if not specified
+
+    :returns: figure, axis and the mode number of entries per day
+
+    """
+    fig, axis = plt.subplots(figsize=(8, 5)) if fig_ax is None else fig_ax
+
+    # Get the dates and number of entries for each participant
+    participant_entries = analysis.find_participant_entries(meal_info)
+    counts = [item for v in participant_entries.values() for item in v[1]]
+    num_per_day = np.column_stack(np.unique(counts, return_counts=True))
+    num_per_day = num_per_day[
+        num_per_day[:, 1].argsort()[::-1]
+    ]  # Sort, descending order, by count
+
+    axis.bar(num_per_day[:, 0], num_per_day[:, 1], color="k")
+
+    axis.set_xlim(0, 50)
+    axis.set_ylim(0, axis.get_ylim()[1])
+    axis.set_xlabel("Number of entries per day")
+    axis.set_ylabel("Count")
+
+    axis.bar(num_per_day[0, 0], num_per_day[0, 1], color="r")
+    axis.text(
+        num_per_day[0, 0], -4, num_per_day[0, 0], ha="center", va="top", color="r"
+    )
+
+    return fig, axis, num_per_day[0, 0]
