@@ -5,6 +5,8 @@ Data cleaning stuff
 import numpy as np
 import pandas as pd
 
+from . import read
+
 
 def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> np.ndarray:
     """
@@ -35,3 +37,39 @@ def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> np.ndarray:
     mask &= time_mask
 
     return mask
+
+
+def cleaned_smartwatch() -> pd.DataFrame:
+    """
+    Return a dataframe of meal time info that has:
+        - had duplicates removed
+        - had events before the participant watch distribution date removed
+        - had events on the watch distribution date removed
+
+    :param meal_info: dataframe holding smartwatch entries
+
+    :returns: a cleaned copy of the dataframe
+
+    """
+    meal_info = read.all_meal_info()
+    feasibility_info = read.smartwatch_feasibility()
+
+    # We only care about ones who consented to the smartwatch study
+    feasibility_info = feasibility_info[feasibility_info["smartwatchwilling"] == 1]
+    feasibility_info = feasibility_info[["residents_id", "actualdateofdistribution1st"]]
+
+    # Join dataframes
+    meal_info = (
+        meal_info.reset_index()
+        .merge(feasibility_info, left_on="p_id", right_on="residents_id", how="left")
+        .set_index(meal_info.index)
+    )
+
+    # Remove early entries
+    meal_info["delta"] = (
+        meal_info.index.to_series() - meal_info["actualdateofdistribution1st"]
+    )
+    meal_info = meal_info[meal_info["delta"].dt.days >= 1]
+
+    # Remove duplicates
+    return meal_info[~duplicates(meal_info)]
