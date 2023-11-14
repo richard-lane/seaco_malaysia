@@ -3,6 +3,7 @@ Plotting tools
 
 """
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -43,3 +44,56 @@ def plot_integrals(
         axis.set_ylabel(label)
 
         axis.plot(times, data, **kwargs)
+
+
+def entry_time_hist(
+    meal_timing_df: pd.DataFrame,
+    *,
+    cumulative: bool = False,
+    granularity: str = "1D",
+    fig_ax: tuple = None,
+) -> tuple[plt.Figure, plt.Axes]:
+    """
+    Plot a histogram of the times of each type of entry in `meal_info`
+
+    :param meal_timing_df: dataframe of smartwatch entries
+    :param cumulative: whether to plot a cumulative histogram
+    :param granularity: bin granularity; "D", "H", etc. Or bins
+    :param fig_ax: optional figure and axis to plot on; creates a new figure if not specified
+
+    :returns
+
+    """
+    min_time, max_time = meal_timing_df.index.min(), meal_timing_df.index.max()
+
+    fig, axis = plt.subplots() if fig_ax is None else fig_ax
+    bins = (
+        pd.date_range(min_time, max_time, freq=granularity)
+        if isinstance(granularity, str)
+        else granularity
+    )
+
+    # Sort the meal type labels
+    labels = meal_timing_df["meal_type"].unique()
+    labels = [
+        *[l for l in labels if l.startswith("No ")],
+        *[l for l in labels if l.startswith("Catch-up")],
+        *labels,
+    ]  # Put them in the desired order
+    labels = list(dict.fromkeys(labels))  # Remove duplicates, preserve order
+
+    # Get a list of Series giving the times of each meal type
+    data = [
+        meal_timing_df[meal_timing_df["meal_type"] == meal_type].index
+        for meal_type in labels
+    ]
+
+    axis.hist(data, bins=bins, stacked=True, label=labels, cumulative=cumulative)
+    axis.legend()
+
+    # If fig and ax specified, we shouldn't take control of the formatting
+    if fig_ax is None:
+        fig.tight_layout()
+        fig.autofmt_xdate()
+
+    return fig, axis
