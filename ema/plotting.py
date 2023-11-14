@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from . import analysis
+
 
 def plot_integrals(
     times: np.ndarray,
@@ -97,3 +99,29 @@ def entry_time_hist(
         fig.autofmt_xdate()
 
     return fig, axis
+
+
+def participant_entries_per_day(
+    meal_info: pd.DataFrame,
+    fig_ax: tuple = None,
+):
+    """
+    Plot a line graph showing how many entries each participant made per day
+
+    :param meal_info: dataframe of smartwatch entries
+    :param fig_ax: optional figure and axis to plot on; creates a new figure if not specified
+
+    :returns: figure and axis, and the dictionary of participant entries
+
+    """
+    fig, axis = plt.subplots(figsize=(8, 5)) if fig_ax is None else fig_ax
+
+    # Get the dates and number of entries for each participant
+    participant_entries = analysis.find_participant_entries(meal_info)
+
+    # Sort by value here
+    plot_kw = {"color": None, "alpha": 0.25, "marker": ".", "linestyle": "-"}
+    for (dates, entries) in participant_entries.values():
+        axis.plot(dates, entries, **plot_kw)
+
+    return fig, axis, participant_entries
