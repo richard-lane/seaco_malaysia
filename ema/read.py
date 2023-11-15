@@ -458,3 +458,33 @@ def no_collection_date(participant_ids: pd.Series) -> set:
             pd.isnull(feasibility_info["collectiondate_actual"])
         ]
     )
+
+
+def add_timedelta(meal_info: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add a column showing the delta between watch distribution date and entry date
+    to a dataframe
+
+    Also adds Datetime, residents_id column
+
+    """
+    feasibility_info = smartwatch_feasibility()
+
+    # We only care about ones who consented to the smartwatch study
+    feasibility_info = feasibility_info[feasibility_info["smartwatchwilling"] == 1]
+    feasibility_info = feasibility_info[["residents_id", "actualdateofdistribution1st"]]
+
+    # Join dataframes
+    meal_info = (
+        meal_info.reset_index()
+        .merge(feasibility_info, left_on="p_id", right_on="residents_id", how="left")
+        .set_index(meal_info.index)
+    )
+
+    meal_info["delta"] = (
+        meal_info.index.to_series() - meal_info["actualdateofdistribution1st"]
+    )
+
+    return meal_info.drop(
+        columns=["Datetime", "residents_id", "actualdateofdistribution1st"]
+    )

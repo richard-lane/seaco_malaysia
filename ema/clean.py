@@ -52,23 +52,9 @@ def cleaned_smartwatch() -> pd.DataFrame:
 
     """
     meal_info = read.all_meal_info()
-    feasibility_info = read.smartwatch_feasibility()
-
-    # We only care about ones who consented to the smartwatch study
-    feasibility_info = feasibility_info[feasibility_info["smartwatchwilling"] == 1]
-    feasibility_info = feasibility_info[["residents_id", "actualdateofdistribution1st"]]
-
-    # Join dataframes
-    meal_info = (
-        meal_info.reset_index()
-        .merge(feasibility_info, left_on="p_id", right_on="residents_id", how="left")
-        .set_index(meal_info.index)
-    )
+    meal_info = read.add_timedelta(meal_info)
 
     # Find early entries
-    meal_info["delta"] = (
-        meal_info.index.to_series() - meal_info["actualdateofdistribution1st"]
-    )
     meal_info = meal_info[meal_info["delta"].dt.days >= 1]
 
     # Find duplicates
