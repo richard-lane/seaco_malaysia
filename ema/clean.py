@@ -65,11 +65,11 @@ def cleaned_smartwatch() -> pd.DataFrame:
         .set_index(meal_info.index)
     )
 
-    # Remove early entries
+    # Find early entries
     meal_info["delta"] = (
         meal_info.index.to_series() - meal_info["actualdateofdistribution1st"]
     )
     meal_info = meal_info[meal_info["delta"].dt.days >= 1]
 
-    # Remove duplicates
+    # Find duplicates
     return meal_info[~duplicates(meal_info)]
