@@ -39,14 +39,28 @@ def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> np.ndarray:
     return mask
 
 
-def cleaned_smartwatch() -> pd.DataFrame:
+def catchups_mask(meal_info: pd.DataFrame) -> pd.Series:
+    """
+    Find a boolean mask indicating which rows are catchups
+
+    :param meal_info: dataframe holding smartwatch entries
+
+    :returns: a boolean mask indicating which rows are catchups
+
+    """
+    return meal_info["meal_type"].isin(
+        ["No catch-up", "Catch-up start", "Catch-up end"]
+    )
+
+
+def cleaned_smartwatch(*, remove_catchups: bool = False) -> pd.DataFrame:
     """
     Return a dataframe of meal time info that has:
         - had duplicates removed (as defined above)
         - had events before the participant watch distribution date removed
         - had events on the watch distribution date removed
 
-    :param meal_info: dataframe holding smartwatch entries
+    :param remove_catchups: whether to remove catchup markers
 
     :returns: a cleaned copy of the dataframe
 
@@ -58,4 +72,9 @@ def cleaned_smartwatch() -> pd.DataFrame:
     meal_info = meal_info[meal_info["delta"].dt.days >= 1]
 
     # Find duplicates
-    return meal_info[~duplicates(meal_info)]
+    meal_info = meal_info[~duplicates(meal_info)]
+
+    if remove_catchups:
+        meal_info = meal_info[~catchups_mask(meal_info)]
+
+    return meal_info
