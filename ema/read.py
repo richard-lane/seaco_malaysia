@@ -132,8 +132,14 @@ def all_meal_info() -> pd.DataFrame:
     # Remove the old date/time columns
     retval = retval.drop(["date", "timestamp"], axis=1)
 
-    # Set it as the index + return
+    # Set it as the index
     retval = retval.set_index("Datetime")
+
+    # Remove Ramadan flags
+    retval = retval[[col for col in retval if "ramadanflag" not in col]]
+
+    # Remove the start/end dates, since they're wrong
+    retval = retval[[col for col in retval if col not in {"firstdate", "lastdate"}]]
 
     # Sort by index
     return retval.sort_index()
