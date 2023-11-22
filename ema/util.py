@@ -42,8 +42,11 @@ def in_ramadan_2022(dates: pd.Series) -> pd.Series:
 
     """
     # Check if the dates are all in 2022
-    if set(dates.year.unique()) != {2022}:
-        warnings.warn(f"Not all dates are in 2022: {set(dates.year.unique())=} ")
+    try:
+        if set(dates.year.unique()) != {2022}:
+            warnings.warn(f"Not all dates are in 2022: {set(dates.year.unique())=} ")
+    except AttributeError:
+        warnings.warn(f"Dates are not a datetime series: {type(dates)=}")
 
     # Check whether they're in 2022 ramadan
     start, end = ramadan_2022()
