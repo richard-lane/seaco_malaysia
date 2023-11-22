@@ -41,7 +41,7 @@ def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> np.ndarray:
 
 def catchups_mask(meal_info: pd.DataFrame) -> pd.Series:
     """
-    Find a boolean mask indicating which rows are catchups
+    Find a boolean mask indicating which rows indicate the start and end of the catchup period
 
     :param meal_info: dataframe holding smartwatch entries
 
@@ -59,8 +59,9 @@ def cleaned_smartwatch(*, remove_catchups: bool = False) -> pd.DataFrame:
         - had duplicates removed (as defined above)
         - had events before the participant watch distribution date removed
         - had events on the watch distribution date removed
+        - additional columns indicating whether each meal or period fell within Ramadan
 
-    :param remove_catchups: whether to remove catchup markers
+    :param remove_catchups: whether to remove the markers indicating the start and end of the catchup period
 
     :returns: a cleaned copy of the dataframe
 
@@ -76,5 +77,7 @@ def cleaned_smartwatch(*, remove_catchups: bool = False) -> pd.DataFrame:
 
     if remove_catchups:
         meal_info = meal_info[~catchups_mask(meal_info)]
+
+    # Add Ramadan info
 
     return meal_info
