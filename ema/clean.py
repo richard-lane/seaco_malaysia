@@ -123,7 +123,7 @@ def cleaned_smartwatch(*, remove_catchups: bool = False) -> pd.DataFrame:
 
     # Ramadan info
     # Whether each entry was within Ramadan
-    meal_info["in_ramadan"] = util.in_ramadan_2022(meal_info.index)
+    meal_info["entry_in_ramadan"] = util.in_ramadan_2022(meal_info.index)
 
     # Whether the participants period was within Ramadan
     ramadan_info = _ramadan_info(meal_info)

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from . import analysis
+from . import analysis, util
 
 
 def plot_integrals(
@@ -104,6 +104,7 @@ def entry_time_hist(
 def participant_entries_per_day(
     meal_info: pd.DataFrame,
     fig_ax: tuple = None,
+    **plot_kwargs: dict,
 ) -> tuple[plt.Figure, plt.Axes, dict[int, tuple[pd.Series, list]]]:
     """
     Plot a line graph showing how many entries each participant made per day
@@ -120,14 +121,20 @@ def participant_entries_per_day(
     participant_entries = analysis.find_participant_entries(meal_info)
 
     plot_kw = {
-        "color": "k",
-        "alpha": 0.25,
-        "marker": ".",
-        "linestyle": "-",
-        "linewidth": 0.5,
+        "color": "k" if "color" not in plot_kwargs else plot_kwargs["color"],
+        "alpha": 0.25 if "alpha" not in plot_kwargs else plot_kwargs["alpha"],
+        "marker": "." if "marker" not in plot_kwargs else plot_kwargs["marker"],
+        "linestyle": "-"
+        if "linestyle" not in plot_kwargs
+        else plot_kwargs["linestyle"],
+        "linewidth": 0.5
+        if "linewidth" not in plot_kwargs
+        else plot_kwargs["linewidth"],
     }
     for dates, entries in participant_entries.values():
         axis.plot(dates, entries, **plot_kw)
+
+    axis.set_ylabel("Number of entries per day")
 
     return fig, axis, participant_entries
 
@@ -167,3 +174,22 @@ def participant_entries_histogram(
     )
 
     return fig, axis, num_per_day[0, 0]
+
+
+def shade_ramadan(axis: plt.Axes, **kwargs) -> None:
+    """
+    Shade the Ramadan period on a plot
+
+    """
+    ymin, ymax = axis.get_ylim()
+
+    ramadan_dates = util.ramadan_2022()
+    axis.fill_between(
+        ramadan_dates,
+        [ymin, ymin],
+        [ymax, ymax],
+        color="k" if "color" not in kwargs else kwargs["color"],
+        alpha=0.25 if "alpha" not in kwargs else kwargs["alpha"],
+    )
+
+    axis.set_ylim(ymin, ymax)
