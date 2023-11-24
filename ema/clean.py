@@ -8,7 +8,7 @@ import pandas as pd
 from . import read, util
 
 
-def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> np.ndarray:
+def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> pd.Series:
     """
     Boolean mask indicating which rows in the dataframe are duplicates
 
@@ -22,19 +22,28 @@ def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> np.ndarray:
     """
     assert meal_info.index.is_monotonic_increasing, "Index not sorted"
 
-    # Bool mask
-    mask = np.full(len(meal_info), True)
+    # Bool mask for the whole dataframe
+    mask = pd.Series(False, index=meal_info.index)
 
-    # Check if the previous entry matches in all these columns
-    for column in ["p_id", "meal_type", "portion_size", "utensil", "location"]:
-        series = meal_info[column]
-        mask &= series.eq(series.shift(1))
+    # Iterate over each participant
+    for p_id, group in meal_info.groupby("p_id"):
+        group_mask = np.full(len(group), True)
 
-    # Check whether the time is withint 5 minutes of the previous entry
-    minutes_diff = meal_info.index.to_series().diff().dt.total_seconds().div(60)
-    time_mask = minutes_diff < delta_minutes
+        # Check if the previous entry matches in all these columns
+        for column in ["meal_type", "portion_size", "utensil", "location"]:
+            series = group[column]
+            group_mask &= series.eq(series.shift(1))
 
-    mask &= time_mask
+        # Check whether the time is withint 5 minutes of the previous entry
+        minutes_diff = group.index.to_series().diff().dt.total_seconds().div(60)
+        time_mask = minutes_diff < delta_minutes
+
+        group_mask &= time_mask.values
+
+        pid_mask = meal_info["p_id"] == p_id
+        mask.loc[pid_mask] = group_mask
+
+    mask.index = meal_info.index
 
     return mask
 
