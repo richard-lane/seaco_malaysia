@@ -229,18 +229,6 @@ def meal_info(participant_id: str) -> pd.DataFrame:
     return all_meals[all_meals["p_id"] == p_id]
 
 
-def catchups_df(*, keep_catchups: bool, verbose: bool = True) -> pd.DataFrame:
-    """
-    Get info from the smartwatch data; sorted by entry timestamp
-
-    :param keep_catchups: whether to keep or remove the catchup entries
-    :param verbose: extra print output
-    :returns: dataframe where the date and timestamp are combined into a single column and set as the index
-
-    """
-    meal_df = all_meal_info(verbose=verbose)
-
-
 def accel_info(filepath: str) -> pd.DataFrame:
     """
     Get accelerometer data from a CWA file
