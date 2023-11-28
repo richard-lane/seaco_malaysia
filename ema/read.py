@@ -6,6 +6,7 @@ import yaml
 import pathlib
 from functools import cache
 
+import numpy as np
 import pandas as pd
 from openmovement.load import CwaData
 
@@ -155,6 +156,18 @@ def _ramadan_info(meal_info: pd.DataFrame, verbose: bool) -> pd.DataFrame:
     return ramadan_df
 
 
+def _add_catchup_col(meal_df: pd.DataFrame) -> None:
+    """Add a column to a dataframe in place indicating whether each entry was a catchup"""
+    meal_df["tmp_flag"] = 0
+
+    meal_df.loc[meal_df["meal_type"] == "Catch-up start", "tmp_flag"] = 1
+    meal_df.loc[meal_df["meal_type"] == "Catch-up end", "tmp_flag"] = -1
+
+    meal_df["catchup"] = meal_df["tmp_flag"].cumsum()
+
+    meal_df.drop(columns=["tmp_flag"], inplace=True)
+
+
 @cache
 def all_meal_info(*, verbose=False) -> pd.DataFrame:
     """
@@ -172,11 +185,17 @@ def all_meal_info(*, verbose=False) -> pd.DataFrame:
         retval["date"].map(str) + retval["timestamp"], format=r"%d%b%Y%H:%M:%S"
     )
 
+    # Set it as the index
+    retval = retval.set_index("Datetime")
+
+    # We likely care more about the time since the start of the study
+    retval = add_timedelta(retval)
+
     # Remove the old date/time columns
     retval = retval.drop(["date", "timestamp"], axis=1)
 
-    # Set it as the index
-    retval = retval.set_index("Datetime")
+    # Add a flag indicating whether each entry was a catchup
+    _add_catchup_col(retval)
 
     # Remove Ramadan flags
     retval = retval[[col for col in retval if "ramadanflag" not in col]]
@@ -208,6 +227,18 @@ def meal_info(participant_id: str) -> pd.DataFrame:
     all_meals = all_meal_info()
 
     return all_meals[all_meals["p_id"] == p_id]
+
+
+def catchups_df(*, keep_catchups: bool, verbose: bool = True) -> pd.DataFrame:
+    """
+    Get info from the smartwatch data; sorted by entry timestamp
+
+    :param keep_catchups: whether to keep or remove the catchup entries
+    :param verbose: extra print output
+    :returns: dataframe where the date and timestamp are combined into a single column and set as the index
+
+    """
+    meal_df = all_meal_info(verbose=verbose)
 
 
 def accel_info(filepath: str) -> pd.DataFrame:

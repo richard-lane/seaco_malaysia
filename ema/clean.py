@@ -62,32 +62,27 @@ def catchups_mask(meal_info: pd.DataFrame) -> pd.Series:
     )
 
 
-def cleaned_smartwatch(
-    *, remove_catchups: bool = False, verbose: bool = False
-) -> pd.DataFrame:
+def clean_meal_info(meal_df: pd.DataFrame, *, verbose: bool = False) -> pd.DataFrame:
     """
-    Return a dataframe of meal time info that has:
+    Clean the provided meal info dataframe.
+
+    Returns a dataframe of meal time info that has:
         - had duplicates removed (as defined above)
         - had events before the participant watch distribution date removed
         - had events on the watch distribution date removed
-        - additional columns indicating whether each meal or period fell within Ramadan
 
-    :param remove_catchups: whether to remove the markers indicating the start and end of the catchup period
-    :param verbose: whether to print warnings
+    :param meal_df: dataframe of meal info
+    :param verbose: extra print information
 
     :returns: a cleaned copy of the dataframe
 
     """
-    meal_info = read.all_meal_info()
-    meal_info = read.add_timedelta(meal_info)
+    retval = meal_df.copy()
 
     # Find early entries
-    meal_info = meal_info[meal_info["delta"].dt.days >= 1]
+    retval = retval[retval["delta"].dt.days >= 1]
 
     # Find duplicates
     meal_info = meal_info[~duplicates(meal_info)]
-
-    if remove_catchups:
-        meal_info = meal_info[~catchups_mask(meal_info)]
 
     return meal_info
