@@ -75,7 +75,7 @@ def _first_last_date(meal_info: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
     return dates.first(), dates.last()
 
 
-def _ramadan_info(meal_info: pd.DataFrame) -> pd.DataFrame:
+def _ramadan_info(meal_info: pd.DataFrame, verbose: bool) -> pd.DataFrame:
     """
     Information about whether the participant's period intersected with Ramadan
 
@@ -83,12 +83,12 @@ def _ramadan_info(meal_info: pd.DataFrame) -> pd.DataFrame:
     # Whether the first and last entry for this participant was within Ramadan
     first, last = _first_last_date(meal_info)
     ramadan_df = (
-        util.in_ramadan_2022(first)
+        util.in_ramadan_2022(first, verbose=verbose)
         .to_frame()
         .rename(columns={"Datetime": "first_in_ramadan"})
     )  # Find whether the first entry was in ramadan
     ramadan_df = ramadan_df.merge(
-        util.in_ramadan_2022(last)
+        util.in_ramadan_2022(last, verbose=verbose)
         .to_frame()
         .rename(columns={"Datetime": "last_in_ramadan"}),
         on="p_id",
@@ -105,7 +105,9 @@ def _ramadan_info(meal_info: pd.DataFrame) -> pd.DataFrame:
     return ramadan_df
 
 
-def cleaned_smartwatch(*, remove_catchups: bool = False) -> pd.DataFrame:
+def cleaned_smartwatch(
+    *, remove_catchups: bool = False, verbose: bool = False
+) -> pd.DataFrame:
     """
     Return a dataframe of meal time info that has:
         - had duplicates removed (as defined above)
@@ -114,6 +116,7 @@ def cleaned_smartwatch(*, remove_catchups: bool = False) -> pd.DataFrame:
         - additional columns indicating whether each meal or period fell within Ramadan
 
     :param remove_catchups: whether to remove the markers indicating the start and end of the catchup period
+    :param verbose: whether to print warnings
 
     :returns: a cleaned copy of the dataframe
 
@@ -132,10 +135,12 @@ def cleaned_smartwatch(*, remove_catchups: bool = False) -> pd.DataFrame:
 
     # Ramadan info
     # Whether each entry was within Ramadan
-    meal_info["entry_in_ramadan"] = util.in_ramadan_2022(meal_info.index)
+    meal_info["entry_in_ramadan"] = util.in_ramadan_2022(
+        meal_info.index, verbose=verbose
+    )
 
     # Whether the participants period was within Ramadan
-    ramadan_info = _ramadan_info(meal_info)
+    ramadan_info = _ramadan_info(meal_info, verbose=verbose)
 
     # Need to do this to preserve the index
     meal_info["Datetime"] = meal_info.index
