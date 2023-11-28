@@ -112,11 +112,55 @@ def accel_filepath(
     return _data_dir() / filename
 
 
-@cache
-def all_meal_info() -> pd.DataFrame:
+def _first_last_date(meal_info: pd.DataFrame) -> tuple[pd.Series, pd.Series]:
     """
-    Get smartwatch meal info from the smartwatch data
+    Return a series of the first date for each participant
 
+    :param meal_info: dataframe of smartwatch entries
+
+    :returns: series of the first and last date for each participant. Indexed by p_id
+
+    """
+    dates = meal_info.reset_index().groupby("p_id")["Datetime"]
+    return dates.first(), dates.last()
+
+
+def _ramadan_info(meal_info: pd.DataFrame, verbose: bool) -> pd.DataFrame:
+    """
+    Information about whether the participant's period intersected with Ramadan
+
+    """
+    # Whether the first and last entry for this participant was within Ramadan
+    first, last = _first_last_date(meal_info)
+    ramadan_df = (
+        util.in_ramadan_2022(first, verbose=verbose)
+        .to_frame()
+        .rename(columns={"Datetime": "first_in_ramadan"})
+    )  # Find whether the first entry was in ramadan
+    ramadan_df = ramadan_df.merge(
+        util.in_ramadan_2022(last, verbose=verbose)
+        .to_frame()
+        .rename(columns={"Datetime": "last_in_ramadan"}),
+        on="p_id",
+    )  # Find whether the last entry was in ramadan, and add it to the df
+
+    ramadan_df["all_in_ramadan"] = (
+        ramadan_df["first_in_ramadan"] & ramadan_df["last_in_ramadan"]
+    )
+
+    ramadan_df["any_in_ramadan"] = (
+        ramadan_df["first_in_ramadan"] | ramadan_df["last_in_ramadan"]
+    )
+
+    return ramadan_df
+
+
+@cache
+def all_meal_info(*, verbose=False) -> pd.DataFrame:
+    """
+    Get smartwatch meal info from the smartwatch data; sorted by entry timestamp
+
+    :param verbose: extra print output
     :returns: dataframe where the date and timestamp are combined into a single column and set as the index
 
     """
@@ -140,8 +184,16 @@ def all_meal_info() -> pd.DataFrame:
     # Remove the start/end dates, since they're wrong
     retval = retval[[col for col in retval if col not in {"firstdate", "lastdate"}]]
 
-    # Sort by index
-    return retval.sort_index()
+    # Add Ramadan info
+    # Whether each entry was within Ramadan
+    retval["entry_in_ramadan"] = util.in_ramadan_2022(retval.index, verbose=verbose)
+
+    # Whether the participants period was within Ramadan
+    ramadan_info = _ramadan_info(retval, verbose=verbose)
+
+    # Need to do this to preserve the index
+    retval["Datetime"] = retval.index
+    return retval.merge(ramadan_info, on="p_id").set_index("Datetime").sort_index()
 
 
 def meal_info(participant_id: str) -> pd.DataFrame:
