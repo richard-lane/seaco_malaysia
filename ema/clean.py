@@ -83,6 +83,6 @@ def clean_meal_info(meal_df: pd.DataFrame, *, verbose: bool = False) -> pd.DataF
     retval = retval[retval["delta"].dt.days >= 1]
 
     # Find duplicates
-    meal_info = meal_info[~duplicates(meal_info)]
+    retval = retval[~duplicates(retval)]
 
-    return meal_info
+    return retval

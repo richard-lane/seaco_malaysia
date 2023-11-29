@@ -158,10 +158,16 @@ def _ramadan_info(meal_info: pd.DataFrame, verbose: bool) -> pd.DataFrame:
 
 def _add_catchup_col(meal_df: pd.DataFrame) -> None:
     """Add a column to a dataframe in place indicating whether each entry was a catchup"""
-    meal_df["tmp_flag"] = 0
+    # Check that, for a given p_id, the dataframe is sorted by x_id
+    for _, group in meal_df.groupby("p_id"):
+        assert group["x_id"].is_monotonic_increasing
 
+    meal_df["tmp_flag"] = 0
     meal_df.loc[meal_df["meal_type"] == "Catch-up start", "tmp_flag"] = 1
     meal_df.loc[meal_df["meal_type"] == "Catch-up end", "tmp_flag"] = -1
+    assert (
+        (meal_df["tmp_flag"].cumsum().unique()) == [0, 1, -1]
+    ).all(), "Overlaps in catchup periods"
 
     meal_df["catchup"] = meal_df["tmp_flag"].cumsum()
 
