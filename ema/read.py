@@ -174,6 +174,25 @@ def _add_catchup_col(meal_df: pd.DataFrame) -> None:
     meal_df.drop(columns=["tmp_flag"], inplace=True)
 
 
+def raw_meal_info() -> pd.DataFrame:
+    """
+    Meal info exactly as it appears in the CSV
+
+    """
+    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["meal_info"]
+    return pd.read_csv(path)
+
+
+def _datetime(meal_info: pd.DataFrame) -> pd.Series:
+    """
+    Get a series representing the timestamp
+
+    """
+    return pd.to_datetime(
+        meal_info["date"].map(str) + meal_info["timestamp"], format=r"%d%b%Y%H:%M:%S"
+    )
+
+
 @cache
 def all_meal_info(*, verbose=False) -> pd.DataFrame:
     """
@@ -183,13 +202,10 @@ def all_meal_info(*, verbose=False) -> pd.DataFrame:
     :returns: dataframe where the date and timestamp are combined into a single column and set as the index
 
     """
-    path = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["meal_info"]
-    retval = pd.read_csv(path)
+    retval = raw_meal_info()
 
     # Find a series representing the timestamp
-    retval["Datetime"] = pd.to_datetime(
-        retval["date"].map(str) + retval["timestamp"], format=r"%d%b%Y%H:%M:%S"
-    )
+    retval["Datetime"] = _datetime(retval)
 
     # Set it as the index
     retval = retval.set_index("Datetime")
