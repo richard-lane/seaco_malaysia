@@ -2,6 +2,8 @@
 Data cleaning stuff
 
 """
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -116,7 +118,9 @@ def flag_catchups(meal_info: pd.DataFrame) -> pd.DataFrame:
             copy.loc[start_time, col_name] = "Normal"
 
     # We've reached the end of the dataframe, but are still in a catchup. This means it's open-ended
-    copy.loc[start_time, col_name] = "Open-ended"
+    if in_catchup:
+        warnings.warn("Reached end of dataframe while in catchup: the last entry is open-ended")
+        copy.loc[start_time, col_name] = "Open-ended"
 
     return copy
 
