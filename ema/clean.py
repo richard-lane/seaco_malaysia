@@ -48,7 +48,7 @@ def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> pd.Series:
     return mask
 
 
-def catchup_category(meal_info: pd.DataFrame) -> pd.DataFrame:
+def flag_catchups(meal_info: pd.DataFrame) -> pd.DataFrame:
     """
     Find the catchup category for each "Catch-up start" entry in the dataframe.
 
@@ -82,16 +82,13 @@ def catchup_category(meal_info: pd.DataFrame) -> pd.DataFrame:
     for time, row in copy.iterrows():
         # We've encountered a new catchup
         if row["meal_type"] == "Catch-up start":
-            start_time = time
-
             # If there's no end time, then it's open-ended
             if in_catchup:
-                copy.loc[time, col_name] = "Open-ended"
-                in_catchup = False
-                continue
-            else:
-                in_catchup = True
-                continue
+                copy.loc[start_time, col_name] = "Open-ended"
+
+            start_time = time
+            in_catchup = True
+            continue
 
         elif row["meal_type"] == "Catch-up end":
             if not in_catchup:
@@ -117,7 +114,10 @@ def catchup_category(meal_info: pd.DataFrame) -> pd.DataFrame:
 
             # Otherwise, it's normal
             copy.loc[start_time, col_name] = "Normal"
-    
+
+    # We've reached the end of the dataframe, but are still in a catchup. This means it's open-ended
+    copy.loc[start_time, col_name] = "Open-ended"
+
     return copy
 
 
