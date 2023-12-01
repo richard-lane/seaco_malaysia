@@ -48,6 +48,28 @@ def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> pd.Series:
     return mask
 
 
+def catchup_category(meal_info: pd.DataFrame) -> pd.DataFrame:
+    """
+    Find the catchup category for each "Catch-up start" entry in the dataframe.
+
+    Adds a new column "catchup_category" and returns a new dataframe.
+
+    Either:
+        - Normal: end within 60s of start, started between 0800 and 0805
+        - Early: started before 0800
+        - Late: started after 0805
+        - Long: end longer than 60s after start
+        - Open-ended
+    ValueError otherwise.
+
+    :param meal_info: dataframe holding smartwatch entries
+
+    :returns: a new dataframe with the catchup category column added
+    :raises ValueError: if a catchup is encountered outside of these categories
+
+    """
+
+
 def catchups_mask(meal_info: pd.DataFrame) -> pd.Series:
     """
     Find a boolean mask indicating which rows indicate the start and end of the catchup period
