@@ -53,13 +53,14 @@ def catchup_category(meal_info: pd.DataFrame) -> pd.DataFrame:
     Find the catchup category for each "Catch-up start" entry in the dataframe.
 
     Adds a new column "catchup_category" and returns a new dataframe.
+    Dataframe must have datetime as index
 
-    Either:
-        - Normal: end within 60s of start, started between 0800 and 0805
-        - Early: started before 0800
-        - Late: started after 0805
+    Checks in this order:
+        - Open-ended: no Catch-up end
         - Long: end longer than 60s after start
-        - Open-ended
+        - Early: started before 0800
+        - Normal: end within 60s of start, started between 0800 and 0805
+        - Late: started after 0805
     ValueError otherwise.
 
     :param meal_info: dataframe holding smartwatch entries
@@ -68,6 +69,56 @@ def catchup_category(meal_info: pd.DataFrame) -> pd.DataFrame:
     :raises ValueError: if a catchup is encountered outside of these categories
 
     """
+    copy = meal_info.copy()
+
+    # Add a new column
+    col_name = "catchup_category"
+    copy["catchup_category"] = np.nan
+
+    # Iterate rows
+    # Slow, but it's fine
+    in_catchup = False
+    start_time = None
+    for time, row in copy.iterrows():
+        # We've encountered a new catchup
+        if row["meal_type"] == "Catch-up start":
+            start_time = time
+
+            # If there's no end time, then it's open-ended
+            if in_catchup:
+                copy.loc[time, col_name] = "Open-ended"
+                in_catchup = False
+                continue
+            else:
+                in_catchup = True
+                continue
+
+        elif row["meal_type"] == "Catch-up end":
+            if not in_catchup:
+                raise ValueError("Catch-up end without start")
+
+            in_catchup = False
+            catchup_length = (time - start_time).total_seconds()
+
+            # If the end is more than 60s after the start, then it's long
+            if catchup_length > 60:
+                copy.loc[start_time, col_name] = "Long"
+                continue
+
+            # If the start time is before 0800, then it's early
+            if start_time.hour < 8:
+                copy.loc[start_time, col_name] = "Early"
+                continue
+
+            # If the start time is after 0805, then it's late
+            if start_time.hour > 8 or (start_time.hour == 8 and start_time.minute > 5):
+                copy.loc[start_time, col_name] = "Late"
+                continue
+
+            # Otherwise, it's normal
+            copy.loc[start_time, col_name] = "Normal"
+    
+    return copy
 
 
 def catchups_mask(meal_info: pd.DataFrame) -> pd.Series:
