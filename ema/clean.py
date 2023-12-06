@@ -254,6 +254,19 @@ def flag_catchup_entries(meal_info: pd.DataFrame) -> pd.DataFrame:
     return copy
 
 
+def remove_catchups(meal_info: pd.DataFrame) -> pd.DataFrame:
+    """
+    From a dataframe of meal info, remove the catch-up entries and their flags
+
+    Must have added these already
+
+    """
+    keep_mask = meal_info["catchup_flag"] == False
+    keep_mask &= ~catchups_mask(meal_info)
+
+    return meal_info[keep_mask]
+
+
 def clean_meal_info(meal_df: pd.DataFrame, *, verbose: bool = False) -> pd.DataFrame:
     """
     Clean the provided meal info dataframe.
