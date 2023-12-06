@@ -119,7 +119,9 @@ def flag_catchups(meal_info: pd.DataFrame) -> pd.DataFrame:
 
     # We've reached the end of the dataframe, but are still in a catchup. This means it's open-ended
     if in_catchup:
-        warnings.warn("Reached end of dataframe while in catchup: the last entry is open-ended")
+        warnings.warn(
+            "Reached end of dataframe while in catchup: the last entry is open-ended"
+        )
         copy.loc[start_time, col_name] = "Open-ended"
 
     return copy
@@ -137,6 +139,119 @@ def catchups_mask(meal_info: pd.DataFrame) -> pd.Series:
     return meal_info["meal_type"].isin(
         ["No catch-up", "Catch-up start", "Catch-up end"]
     )
+
+
+def flag_catchup_entries(meal_info: pd.DataFrame) -> pd.DataFrame:
+    """
+    Flag whether each entry was in the catchup period
+
+    Adds a new column "catchup_flag" and returns a new dataframe.
+    Dataframe must have datetime as index, and must have a "catchup_category" column
+
+    :param meal_info: dataframe holding smartwatch entries
+
+    :returns: a new dataframe with a "catchup_flag" column added
+    :raises ValueError: if a catchup is encountered outside of these categories
+
+    """
+    copy = meal_info.copy()
+
+    # Add a new column
+    copy["catchup_flag"] = False
+
+    # This is much less efficient, but I've decided to iterate over the dataframe multiple times marking each type of catchup
+    # This is because it's easier to understand and debug
+
+    # Mainline/early/late catchups
+    in_catchup = False
+    for time, row in copy.iterrows():
+        if in_catchup:
+            copy.loc[time, "catchup_flag"] = True
+
+        if row["catchup_category"] in {"Early", "Late", "Normal"}:
+            in_catchup = True
+
+        elif row["meal_type"] == "Catch-up end":
+            in_catchup = False
+
+    # Long catchup
+    iterator = copy.iterrows()
+    for time, row in iterator:
+        if row["catchup_category"] == "Long":
+            # Check if the first entry is a no response
+            next_time, next_row = next(iterator, None)
+            assert (
+                next_row["meal_type"] == "No response"
+            ), "Long catchup not started with no response"
+
+            # Warn the user (me) that we're assuming the next entry isn't a real catch-up
+            next_time, next_row = next(iterator, None)
+            warnings.warn(
+                f"{util.bcolour.OKBLUE}Long catchup: not marking"
+                f" {next_row['meal_type']} at {next_time} as catchup"
+                f"{util.bcolour.ENDC}"
+            )
+
+            # Check that the next entry is the end of the catch-up period
+            _, next_row = next(iterator, None)
+            assert next_row["meal_type"] == "Catch-up end", "Long catchup not ended"
+
+    # Open-ended catchups
+    iterator = copy.iterrows()
+    in_catchup = False
+    n_open_ended = 0
+    for time, row in iterator:
+        # If we encounter an open catch-up period, go into a loop
+        if row["catchup_category"] == "Open-ended":
+            n_open_ended += 1
+            # Look through rows
+            while True:
+                next_time, next_row = next(iterator, None)
+                # If we encounter a No catch-up, then we're out of the catch-up period
+                if next_row["meal_type"] == "No catch-up":
+                    print(
+                        f" Open ended catchup at {util.bcolour.WARNING}{time}{util.bcolour.ENDC} ended by No catch-up at {util.bcolour.WARNING}{next_time}{util.bcolour.ENDC}"
+                    )
+                    break
+
+                # If we encounter a No Response, then we're out of the catch-up period
+                if next_row["meal_type"] == "No response":
+                    print(
+                        f" Open ended catchup at {util.bcolour.OKGREEN}{time}{util.bcolour.ENDC} ended by No response at {util.bcolour.OKGREEN}{next_time}{util.bcolour.ENDC}"
+                    )
+                    break
+
+                # If we encounter a time > 30 minutes after the start, then we're out of the catch-up period
+                if (next_time - time) > pd.Timedelta(minutes=30):
+                    print(
+                        f" Open ended catchup at {util.bcolour.FAIL}{time}{util.bcolour.ENDC} ended by long wait at {util.bcolour.FAIL}{next_time}{util.bcolour.ENDC}"
+                    )
+                    break
+
+                # If we encounter a non-open-ended catch-up start, then we are out of the catch-up period
+                if (
+                    next_row["meal_type"] == "Catch-up start"
+                    and next_row["catchup_category"] != "Open-ended"
+                ):
+                    print(
+                        f" Open ended catchup at {util.bcolour.FAIL}{time}{util.bcolour.ENDC} ended by Catch-up start at {util.bcolour.FAIL}{next_time}{util.bcolour.ENDC}"
+                    )
+                    break
+
+                # If we encounter a meal, drink or snack within 5 minutes of the start, mark it as catch-up and keep iterating
+                if next_row["meal_type"] in {"Meal", "Drink", "Snack"} and (
+                    next_time - time
+                ) < pd.Timedelta(minutes=5):
+                    copy.loc[next_time, "catchup_flag"] = True
+                    continue
+
+                # Something I haven't considered
+                else:
+                    raise ValueError(f"{time}, {next_time}")
+
+    # Just to check sanity
+    print(f"{n_open_ended=}")
+    return copy
 
 
 def clean_meal_info(meal_df: pd.DataFrame, *, verbose: bool = False) -> pd.DataFrame:
