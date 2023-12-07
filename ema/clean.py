@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from . import util
+from . import util, read
 
 
 def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> pd.Series:
@@ -267,7 +267,9 @@ def remove_catchups(meal_info: pd.DataFrame) -> pd.DataFrame:
     return meal_info[keep_mask]
 
 
-def clean_meal_info(meal_df: pd.DataFrame, *, verbose: bool = False) -> pd.DataFrame:
+def clean_meal_info(
+    meal_df: pd.DataFrame, *, keep_catchups: bool, verbose: bool = False
+) -> pd.DataFrame:
     """
     Clean the provided meal info dataframe.
 
@@ -275,8 +277,10 @@ def clean_meal_info(meal_df: pd.DataFrame, *, verbose: bool = False) -> pd.DataF
         - had duplicates removed (as defined above)
         - had events before the participant watch distribution date removed
         - had events on the watch distribution date removed
+        - had events more than 7 days after the distribution date removed
 
     :param meal_df: dataframe of meal info
+    :param keep_catchups: whether to keep catchup markers and entries
     :param verbose: extra print information
 
     :returns: a cleaned copy of the dataframe
@@ -287,7 +291,18 @@ def clean_meal_info(meal_df: pd.DataFrame, *, verbose: bool = False) -> pd.DataF
     # Find early entries
     retval = retval[retval["delta"].dt.days >= 1]
 
+    # Fine late entries
+    retval = retval[retval["delta"].dt.days <= 7]
+
     # Find duplicates
     retval = retval[~duplicates(retval)]
 
+    # Optionally remove catchups
+    if not keep_catchups:
+        retval = remove_catchups(retval)
+
     return retval
+
+
+def cleaned_smartwatch(*, keep_catchups: bool) -> pd.DataFrame:
+    return clean_meal_info(read.all_meal_info(), keep_catchups=keep_catchups)
