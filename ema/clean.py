@@ -7,7 +7,7 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from . import read, util
+from . import util
 
 
 def duplicates(meal_info: pd.DataFrame, delta_minutes: int = 5) -> pd.Series:

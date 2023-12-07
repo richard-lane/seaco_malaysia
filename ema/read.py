@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from openmovement.load import CwaData
 
-from . import util, parse
+from . import util, parse, clean
 
 
 def _data_dir() -> pathlib.Path:
@@ -156,24 +156,6 @@ def _ramadan_info(meal_info: pd.DataFrame, verbose: bool) -> pd.DataFrame:
     return ramadan_df
 
 
-def _add_catchup_col(meal_df: pd.DataFrame) -> None:
-    """Add a column to a dataframe in place indicating whether each entry was a catchup"""
-    # Check that, for a given p_id, the dataframe is sorted by x_id
-    for _, group in meal_df.groupby("p_id"):
-        assert group["x_id"].is_monotonic_increasing
-
-    meal_df["tmp_flag"] = 0
-    meal_df.loc[meal_df["meal_type"] == "Catch-up start", "tmp_flag"] = 1
-    meal_df.loc[meal_df["meal_type"] == "Catch-up end", "tmp_flag"] = -1
-    assert (
-        (meal_df["tmp_flag"].cumsum().unique()) == [0, 1, -1]
-    ).all(), "Overlaps in catchup periods"
-
-    meal_df["catchup"] = meal_df["tmp_flag"].cumsum()
-
-    meal_df.drop(columns=["tmp_flag"], inplace=True)
-
-
 def raw_meal_info() -> pd.DataFrame:
     """
     Meal info exactly as it appears in the CSV
@@ -216,10 +198,11 @@ def all_meal_info(*, verbose=False) -> pd.DataFrame:
     # Remove the old date/time columns
     retval = retval.drop(["date", "timestamp"], axis=1)
 
-    # Add a flag indicating whether each entry was a catchup
-    _add_catchup_col(retval)
+    # Add catchup info
+    retval = clean.flag_catchups(retval)
+    retval = clean.flag_catchup_entries(retval)
 
-    # Remove Ramadan flags
+    # Remove incorrect Ramadan flags
     retval = retval[[col for col in retval if "ramadanflag" not in col]]
 
     # Remove the start/end dates, since they're wrong
