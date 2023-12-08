@@ -544,3 +544,33 @@ def add_timedelta(meal_info: pd.DataFrame) -> pd.DataFrame:
     return meal_info.drop(
         columns=["Datetime", "residents_id", "actualdateofdistribution1st"]
     )
+
+
+def n_days_in_school(*, subset: str = None) -> dict:
+    """
+    Find how many days each participant was in school for during the study
+
+    Q: In the last 7 days, how many days did you attend school (except home-based teaching)?
+
+    :param subset: whether to only include participants who consented to the smartwatch study
+
+    """
+    assert subset in {None, "smartwatch", "not smartwatch"}
+
+    feasibility_df = _qnaire_df()
+
+    # Only the respondents who consented
+    feasibility_df = feasibility_df[feasibility_df["respondent_status"] == 1] 
+
+    if subset is None:
+        keep = ...
+    elif subset == "smartwatch":
+        keep = feasibility_df["smartwatchwilling"] == 1
+    elif subset == "not smartwatch":
+        keep = feasibility_df["smartwatchwilling"] == 2
+    else:
+        raise ValueError
+
+    return dict(
+        zip(feasibility_df["residents_id"][keep], feasibility_df["phyactq1"][keep])
+    )
