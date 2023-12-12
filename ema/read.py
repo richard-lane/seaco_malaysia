@@ -560,7 +560,7 @@ def n_days_in_school(*, subset: str = None) -> dict:
     feasibility_df = _qnaire_df()
 
     # Only the respondents who consented
-    feasibility_df = feasibility_df[feasibility_df["respondent_status"] == 1] 
+    feasibility_df = feasibility_df[feasibility_df["respondent_status"] == 1]
 
     if subset is None:
         keep = ...

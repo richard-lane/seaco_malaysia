@@ -38,6 +38,9 @@ def count_dict(array: np.ndarray) -> dict:
     return dict(zip(*np.unique(array, return_counts=True)))
 
 
+def lockdown_end() -> pd.Timestamp:
+    return pd.to_datetime("2022-04-17")
+
 def ramadan_2022() -> pd.Series:
     """
     Ramadan dates
