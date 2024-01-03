@@ -1,5 +1,6 @@
 # Generated files, that I don't want to carry around (unless I decide to run tests remotely)
 test/data/*
+mlm_pipeline/data/model_df.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
