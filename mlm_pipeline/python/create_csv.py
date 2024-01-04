@@ -25,6 +25,9 @@ def main():
     model_df["p_id"] = meal_info["p_id"]
     model_df["day"] = meal_info["delta"].dt.days
 
+    # Whether each day was a weekend or weekday
+    model_df["weekend"] = meal_info.index.dayofweek.isin({5, 6}).astype(int)
+
     # Whether each entry was a reponse or not
     model_df["entry"] = (
         meal_info["meal_type"]
