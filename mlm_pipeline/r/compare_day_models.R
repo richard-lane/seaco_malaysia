@@ -22,6 +22,7 @@ percentage_yes <- model_df %>%
 
 plot_and_save <- function(model, filename) {
     plot <- plot_model(model, type = "eff", terms = "day", show.rug = TRUE)
+    plot <- plot + geom_point(data = percentage_yes, aes(x = day, y = percentage_yes / 100), color = "black")
     plot <- plot + scale_y_continuous(limits = c(0.0, 1.0), label = percent_format(accuracy = 10))
     ggsave(filename, plot)
 }
