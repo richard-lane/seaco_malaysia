@@ -9,13 +9,20 @@ library(sjPlot)
 model_df <- read_csv("mlm_pipeline/data/model_df.csv")
 
 # Define some models
-fixed_only <- glmer(entry ~ (1 | p_id), data = model_df, family = binomial(link = "logit"))
-random_slope <- glmer(entry ~ day + (1 | p_id), data = model_df, family = binomial(link = "logit"))
-random_both <- glmer(entry ~ day + (day | p_id), data = model_df, family = binomial(link = "logit"))
+fixed_only <- glm(entry ~ day, data = model_df, family = binomial(link = "logit"))
+random_intercept <- glmer(entry ~ day + (1 | p_id), data = model_df, family = binomial(link = "logit"))
+random_both <- glmer(entry ~ day + (1 + day | p_id), data = model_df, family = binomial(link = "logit"))
 
-# Extract random effects
-my_plot <- plot_model(random_both, type = "eff", terms = "day", show.rug = TRUE)
-my_plot + scale_y_continuous(limits = c(0.0, 1.0), label = scales::percent_format(accuracy = 10))
+fixed_plot <- plot_model(fixed_only, type = "eff", terms = "day", show.rug = TRUE)
+fixed_plot + scale_y_continuous(limits = c(0.0, 1.0), label = scales::percent_format(accuracy = 10))
+ggsave("fixed_only_fit.png")
+
+intercept_plot <- plot_model(random_intercept, type = "eff", terms = "day", show.rug = TRUE)
+intercept_plot + scale_y_continuous(limits = c(0.0, 1.0), label = scales::percent_format(accuracy = 10))
+ggsave("random_intercepts.png")
+
+full_plot <- plot_model(random_both, type = "eff", terms = "day", show.rug = TRUE)
+full_plot + scale_y_continuous(limits = c(0.0, 1.0), label = scales::percent_format(accuracy = 10))
 ggsave("random_pids_fit.png")
 
 # Plot histograms
@@ -28,5 +35,13 @@ ggplot(random_effects, aes(x = value)) +
 
 ggsave("random_pid_effects_hists.png")
 
-# Anova
-anova(fixed_only, random_slope, random_both)
+# Anova - to motivate having both a random intercept and slope
+anova(random_intercept, random_both)
+
+aic_values <- data.frame(
+    model = c("fixed_only", "random_intercept", "random_both"),
+    AIC = c(AIC(fixed_only), AIC(random_intercept), AIC(random_both)),
+    BIC = c(BIC(fixed_only), BIC(random_intercept), BIC(random_both))
+)
+
+print(aic_values)
