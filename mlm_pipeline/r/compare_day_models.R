@@ -15,6 +15,11 @@ fixed_only <- glm(entry ~ day, data = model_df, family = binomial(link = "logit"
 random_intercept <- glmer(entry ~ day + (1 | p_id), data = model_df, family = binomial(link = "logit"))
 random_both <- glmer(entry ~ day + (1 + day | p_id), data = model_df, family = binomial(link = "logit"))
 
+# Find what percentage of positive entries there were on each day
+percentage_yes <- model_df %>%
+    group_by(day) %>%
+    summarise(percentage_yes = mean(entry) * 100)
+
 plot_and_save <- function(model, filename) {
     plot <- plot_model(model, type = "eff", terms = "day", show.rug = TRUE)
     plot <- plot + scale_y_continuous(limits = c(0.0, 1.0), label = percent_format(accuracy = 10))
