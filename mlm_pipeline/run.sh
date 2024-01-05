@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 DIR="$(dirname "$(readlink -fm "$0")")"
 
 # Create csv file if it doesn't exist
