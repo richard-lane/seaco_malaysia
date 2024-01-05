@@ -27,9 +27,9 @@ plot_and_save <- function(model, filename) {
     ggsave(filename, plot)
 }
 
-plot_and_save(sex_model, "sex_fit.png")
-plot_and_save(ethnicity_model, "ethnicity_fit.png")
-plot_and_save(age_model, "age_fit.png")
+plot_and_save(sex_model, "mlm_pipeline/outputs/sex_fit.png")
+plot_and_save(ethnicity_model, "mlm_pipeline/outputs/ethnicity_fit.png")
+plot_and_save(age_model, "mlm_pipeline/outputs/age_fit.png")
 
 capture.output(summary(sex_model), file = "sex_model.txt")
 capture.output(summary(ethnicity_model), file = "ethnicity_model.txt")

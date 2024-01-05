@@ -30,9 +30,9 @@ plot_and_save <- function(model, filename) {
     ggsave(filename, plot)
 }
 
-plot_and_save(fixed_only, "fixed_only_fit.png")
-plot_and_save(random_intercept, "random_intercepts.png")
-plot_and_save(random_both, "random_pids_fit.png")
+plot_and_save(fixed_only, "mlm_pipeline/outputs/fixed_only_fit.png")
+plot_and_save(random_intercept, "mlm_pipeline/outputs/random_intercepts_fit.png")
+plot_and_save(random_both, "mlm_pipeline/outputs/random_intercept_and_slope_fit.png")
 
 plot_individual_pids <- function(model, filename) {
     # Create a new data frame with the unique days and p_ids
@@ -56,8 +56,8 @@ plot_individual_pids <- function(model, filename) {
 
     ggsave(filename, plot)
 }
-plot_individual_pids(random_intercept, "random_intercepts_all.png")
-plot_individual_pids(random_both, "random_pids_fit_all.png")
+plot_individual_pids(random_intercept, "mlm_pipeline/outputs/random_intercepts_all.png")
+plot_individual_pids(random_both, "mlm_pipeline/outputs/random_pids_fit_all.png")
 
 
 # Plot histograms
