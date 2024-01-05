@@ -36,6 +36,14 @@ def main():
         .merge(demographic_df, left_on="p_id", right_on="residents_id", how="left")
         .set_index(model_df.index)
     )
+    model_df.rename(
+        columns={
+            "age_dob": "age",
+            "respondent_sex": "sex",
+            "respondent_ethnicity": "ethnicity",
+        },
+        inplace=True,
+    )
 
     # Whether each day was a weekend or weekday
     model_df["weekend"] = meal_info.index.dayofweek.isin({5, 6}).astype(int)

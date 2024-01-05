@@ -14,6 +14,7 @@ fi
 # Compare the different multi level models - to motivate that the random intercept and slope model is the best
 Rscript $DIR/r/compare_day_models.R
 
-# Run a model with a fixed effect from the weekend
-
 # Run models with fixed effects from demographic information
+Rscript $DIR/r/demographic_models.R
+
+# Run a model with a fixed effect from the weekend

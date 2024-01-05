@@ -71,7 +71,11 @@ ggplot(random_effects, aes(x = value)) +
 ggsave("random_pid_effects_hists.png")
 
 # Anova - to motivate having both a random intercept and slope
-anova(random_intercept, random_both)
+out_file <- "day_models.txt"
+capture.output(summary(fixed_only), file = out_file)
+capture.output(summary(random_intercept), file = out_file, append = TRUE)
+capture.output(summary(random_both), file = out_file, append = TRUE)
+capture.output(anova(random_intercept, random_both), file = out_file, append = TRUE)
 
 aic_values <- data.frame(
     model = c("fixed_only", "random_intercept", "random_both"),
@@ -79,4 +83,4 @@ aic_values <- data.frame(
     BIC = c(BIC(fixed_only), BIC(random_intercept), BIC(random_both))
 )
 
-print(aic_values)
+capture.output(aic_values, file = out_file, append = TRUE)
