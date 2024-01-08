@@ -21,20 +21,21 @@ percentage_yes <- model_df %>%
     group_by(day) %>%
     summarise(percentage_yes = mean(entry) * 100)
 
-plot_and_save <- function(model, filename) {
-    plot <- plot_model(model, type = "pred", terms = "day", show.rug = TRUE)
+plot_and_save <- function(model, filename, title) {
+    plot <- plot_model(model, type = "pred", terms = "day", show.rug = FALSE, ci.lvl = 0.95)
 
     plot <- plot + geom_point(data = percentage_yes, aes(x = day, y = percentage_yes / 100), color = "#653D9BC4")
     plot <- plot + scale_y_continuous(limits = c(0.0, 1.0), label = percent_format(accuracy = 10))
+    plot <- plot + ggtitle(title)
 
     ggsave(filename, plot)
 }
 
-plot_and_save(fixed_only, "mlm_pipeline/outputs/fixed_only_fit.png")
-plot_and_save(random_intercept, "mlm_pipeline/outputs/random_intercepts_fit.png")
-plot_and_save(random_both, "mlm_pipeline/outputs/random_intercept_and_slope_fit.png")
+plot_and_save(fixed_only, "mlm_pipeline/outputs/fixed_only_fit.png", "Fixed Effects Only")
+plot_and_save(random_intercept, "mlm_pipeline/outputs/random_intercepts_fit.png", "Random Intercepts")
+plot_and_save(random_both, "mlm_pipeline/outputs/random_intercept_and_slope_fit.png", "Random Intercepts and Slopes")
 
-plot_individual_pids <- function(model, filename) {
+plot_individual_pids <- function(model, filename, title) {
     # Create a new data frame with the unique days and p_ids
     newdata <- expand.grid(day = unique(model_df$day), p_id = unique(model_df$p_id))
 
@@ -52,12 +53,13 @@ plot_individual_pids <- function(model, filename) {
         scale_color_manual(values = rep("skyblue", 83)) +
         geom_point(data = percentage_yes, aes(x = day, y = percentage_yes / 100), color = "black") +
         scale_y_continuous(limits = c(0.0, 1.0), label = scales::percent_format(accuracy = 10)) +
-        theme(legend.position = "none")
+        theme(legend.position = "none") +
+        ggtitle(title)
 
     ggsave(filename, plot)
 }
-plot_individual_pids(random_intercept, "mlm_pipeline/outputs/random_intercepts_all.png")
-plot_individual_pids(random_both, "mlm_pipeline/outputs/random_pids_fit_all.png")
+plot_individual_pids(random_intercept, "mlm_pipeline/outputs/random_intercepts_all.png", "Random Intercepts")
+plot_individual_pids(random_both, "mlm_pipeline/outputs/random_pids_fit_all.png", "Random Intercepts and Slopes")
 
 
 # Plot histograms
@@ -84,3 +86,5 @@ aic_values <- data.frame(
 )
 
 capture.output(aic_values, file = out_file, append = TRUE)
+
+# capture.output(confint(random_both), file = out_file, append = TRUE)
