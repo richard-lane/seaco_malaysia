@@ -44,6 +44,9 @@ def main():
         .set_index(model_df.index)
     )
 
+    # Convert sex to 1 or 0 (instead of 1 or 2)
+    model_df["respondent_sex"] -= 1
+
     # Add a column indicating whether the participants are over the age of 12
     model_df["age_group"] = (model_df["age_dob"] > 12).astype(int)
 
