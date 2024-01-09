@@ -11,7 +11,7 @@ model_df <- read_csv("mlm_pipeline/data/model_df.csv")
 # Define some models
 sex_model <- glmer(entry ~ day * sex + (1 + day | p_id), data = model_df, family = binomial(link = "logit"))
 ethnicity_model <- glmer(entry ~ day * ethnicity + (1 + day | p_id), data = model_df, family = binomial(link = "logit"))
-age_model <- glmer(entry ~ day * age + (1 + day | p_id), data = model_df, family = binomial(link = "logit"))
+age_model <- glmer(entry ~ day * age_group + (1 + day | p_id), data = model_df, family = binomial(link = "logit"))
 
 # Find what percentage of positive entries there were on each day
 percentage_yes <- model_df %>%

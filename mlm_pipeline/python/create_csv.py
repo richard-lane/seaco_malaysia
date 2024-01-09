@@ -36,9 +36,12 @@ def main():
         .merge(demographic_df, left_on="p_id", right_on="residents_id", how="left")
         .set_index(model_df.index)
     )
+
+    # Add a column indicating whether the participants are over the age of 12
+    model_df["age_group"] = (model_df["age_dob"] > 12).astype(int)
+
     model_df.rename(
         columns={
-            "age_dob": "age",
             "respondent_sex": "sex",
             "respondent_ethnicity": "ethnicity",
         },
