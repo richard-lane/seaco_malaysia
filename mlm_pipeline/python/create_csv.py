@@ -26,6 +26,11 @@ def main():
     model_df["p_id"] = meal_info["p_id"]
     model_df["day"] = meal_info["delta"].dt.days
 
+    # Weekday information
+    model_df["is_weekend"] = (
+        meal_info["week_day"].isin({"Saturday", "Sunday"}).astype(int)
+    )
+
     # Demographic information
     demographic_df = read._qnaire_df()
     demographic_df = demographic_df[demographic_df["respondent_status"] == 1]
