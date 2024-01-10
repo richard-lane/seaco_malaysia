@@ -20,7 +20,8 @@ plot_and_save <- function(model, covariate, filename, legend) {
         geom_ribbon(data = sjp_data, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group_col), alpha = 0.1) +
         geom_point(data = percentage_yes, aes(x = day, y = percentage_yes / 100), color = "black") +
         scale_y_continuous(limits = c(0.0, 1.0), label = scales::percent_format(accuracy = 1)) +
-        labs(color = covariate, fill = covariate)
+        labs(color = covariate, fill = covariate) +
+        xlab("Day")
 
     ggsave(filename, plot)
 }
