@@ -80,11 +80,26 @@ def ethnicity_plot(demographic_df):
     fig.savefig("mlm_pipeline/outputs/demographics/ethnicity.png")
 
 
-def school_plot():
+def sex_plot(demographic_df):
     """ """
+    sexes = demographic_df["sex"].value_counts()
+
+    total = len(demographic_df)
+
+    def autopct(val):
+        return f"{int(val * total / 100)}\n({val:.1f}%)"
+
+    fig, axis = plt.subplots()
+    axis.pie(
+        sexes,
+        labels=["Female" if i else "Male" for i in sexes.index],
+        autopct=autopct,
+    )
+    fig.tight_layout()
+    fig.savefig("mlm_pipeline/outputs/demographics/sexes.png")
 
 
-def sex_plot():
+def school_plot():
     """ """
 
 
@@ -104,6 +119,8 @@ def main():
     age_hists(entries_df)
 
     ethnicity_plot(entries_df)
+
+    sex_plot(entries_df)
 
 
 if __name__ == "__main__":
