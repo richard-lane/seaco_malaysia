@@ -88,3 +88,18 @@ aic_values <- data.frame(
 capture.output(aic_values, file = out_file, append = TRUE)
 
 # capture.output(confint(random_both), file = out_file, append = TRUE)
+# Find the drop off per day
+p_id_values <- unique(model_df$p_id)
+day_seq <- seq(min(model_df$day), max(model_df$day), by = 1)
+
+# Initialize a vector to store average differences for each p_id
+avg_diffs <- numeric(length(p_id_values))
+for (i in seq_along(p_id_values)) {
+    prob_seq <- predict(random_both, newdata = data.frame(day = day_seq, p_id = p_id_values[i]), type = "response")
+    diff_seq <- diff(prob_seq)
+    avg_diffs[i] <- mean(diff_seq)
+}
+
+# Take the average of the average differences across all p_id values
+avg_diff <- mean(avg_diffs)
+print(avg_diff)

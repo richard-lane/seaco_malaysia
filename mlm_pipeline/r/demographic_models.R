@@ -43,6 +43,7 @@ control <- glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
 sex_model <- glmer(entry ~ day * sex + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
 plot_and_save(sex_model, "sex", "mlm_pipeline/outputs/sex_fit.png", list(`0` = "Male", `1` = "Female"))
 capture.output(summary(sex_model), file = "sex_model.txt")
+capture.output(confint(sex_model, parm = "beta_")["sex", ], file = "sex_model.txt", append=TRUE)
 
 ethnicity_model <- glmer(entry ~ day * ethnicity + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
 plot_and_save(ethnicity_model, "ethnicity", "mlm_pipeline/outputs/ethnicity_fit.png", list(`1` = "Ethnicity 1", `2` = "Ethnicity 2", `3` = "Ethnicity 3"))
