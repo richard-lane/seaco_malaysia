@@ -62,8 +62,22 @@ def age_hists(demographic_df):
     age_stacked_bar(demographic_df)
 
 
-def ethnicity_plot():
-    """ """
+def ethnicity_plot(demographic_df):
+    ethnicities = demographic_df["ethnicity"].value_counts()
+
+    total = len(demographic_df)
+
+    def autopct(val):
+        return f"{int(val * total / 100)}\n({val:.1f}%)"
+
+    fig, axis = plt.subplots()
+    axis.pie(
+        ethnicities,
+        labels=[f"Ethnicity {int(i)}" for i in ethnicities.index],
+        autopct=autopct,
+    )
+    fig.tight_layout()
+    fig.savefig("mlm_pipeline/outputs/demographics/ethnicity.png")
 
 
 def school_plot():
@@ -88,6 +102,8 @@ def main():
     entries_df = entries_df.drop_duplicates(subset="p_id")
 
     age_hists(entries_df)
+
+    ethnicity_plot(entries_df)
 
 
 if __name__ == "__main__":
