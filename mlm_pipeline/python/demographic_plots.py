@@ -27,21 +27,27 @@ def age_hist(demographic_df):
 
 
 def age_stacked_bar(demographic_df):
-    # Count the number of participants in each age
-    age_counts = demographic_df["age_dob"].value_counts().sort_index()
-
-    # Split the counts into two groups
-    age_group1_counts = age_counts.loc[7:12]
-    age_group2_counts = age_counts.loc[13:17]
-
-    # Create a DataFrame for the bar plot
-    bar_data = pd.DataFrame({"7-12": age_group1_counts, "13-17": age_group2_counts})
-
     # Stacked bar plot
     fig, ax = plt.subplots()
-    bar_data.plot(kind="bar", stacked=True, ax=ax)
+
+    bottom = 0
+    for age in range(7, 13):
+        count = (demographic_df["age_dob"] == age).sum()
+        ax.bar(0, count, bottom=bottom)
+        if count > 2:
+            ax.text(0, bottom + count / 2, age, ha="center", va="center")
+        bottom += count
+
+    bottom = 0
+    for age in range(13, 18):
+        count = (demographic_df["age_dob"] == age).sum()
+        ax.bar(1, count, bottom=bottom)
+        ax.text(1, bottom + count / 2, age, ha="center", va="center")
+        bottom += count
+
+    ax.set_xticks((0, 1), ("7-12", "13-17"))
+
     ax.set_ylabel("Count")
-    ax.set_xlabel("Age Group")
 
     fig.tight_layout()
     fig.savefig("mlm_pipeline/outputs/demographics/age_stacked.png")
@@ -53,7 +59,7 @@ def age_hists(demographic_df):
 
     """
     age_hist(demographic_df)
-    # age_stacked_bar(demographic_df)
+    age_stacked_bar(demographic_df)
 
 
 def ethnicity_plot():
