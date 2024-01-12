@@ -15,6 +15,11 @@ plot_and_save <- function(model, covariate, filename, legend) {
     sjp_data$group_col <- plyr::revalue(sjp_data$group_col, legend)
     sjp_data$group_col <- as.character(sjp_data$group_col)
 
+    # Reorder factor levels if covariate is 'weekday'
+    if (covariate == "weekday") {
+        sjp_data$group_col <- factor(sjp_data$group_col, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+    }
+
     plot <- ggplot() +
         geom_line(data = sjp_data, aes(x = x, y = predicted, color = group_col)) +
         geom_ribbon(data = sjp_data, aes(x = x, ymin = conf.low, ymax = conf.high, fill = group_col), alpha = 0.1) +
