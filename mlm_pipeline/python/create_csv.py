@@ -31,6 +31,9 @@ def main():
         meal_info["week_day"].isin({"Saturday", "Sunday"}).astype(int)
     )
 
+    # Ramadan
+    model_df["all_in_ramadan"] = meal_info["all_in_ramadan"].astype(int)
+
     # Demographic information
     demographic_df = read._qnaire_df()
     demographic_df = demographic_df[demographic_df["respondent_status"] == 1]
