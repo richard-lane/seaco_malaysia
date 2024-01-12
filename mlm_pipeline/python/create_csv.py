@@ -27,6 +27,17 @@ def main():
     model_df["day"] = meal_info["delta"].dt.days
 
     # Weekday information
+    model_df["weekday"] = meal_info["week_day"].map(
+        {
+            "Monday": 1,
+            "Tuesday": 2,
+            "Wednesday": 3,
+            "Thursday": 4,
+            "Friday": 5,
+            "Saturday": 6,
+            "Sunday": 7,
+        }
+    )
     model_df["is_weekend"] = (
         meal_info["week_day"].isin({"Saturday", "Sunday"}).astype(int)
     )

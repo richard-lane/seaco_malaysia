@@ -156,7 +156,7 @@ def weekday_hist(demographic_df, day_lookup):
     bins = np.concatenate([bins - 0.2, bins + 0.2])
     bins = np.sort(bins)
 
-    ax.hist(demographic_df["day"], bins=bins)
+    ax.hist(demographic_df["weekday"], bins=bins)
     ax.set_ylabel("Number of Entries")
     ax.set_xlabel("Day")
 
@@ -172,7 +172,7 @@ def weekday_stacked_bar(demographic_df, day_lookup):
 
     bottom = 0
     for day in range(1, 6):
-        count = (demographic_df["day"] == day).sum()
+        count = (demographic_df["weekday"] == day).sum()
         ax.bar(0, count, bottom=bottom)
         if count > 2:
             ax.text(0, bottom + count / 2, day_lookup[day], ha="center", va="center")
@@ -180,7 +180,7 @@ def weekday_stacked_bar(demographic_df, day_lookup):
 
     bottom = 0
     for day in range(6, 8):
-        count = (demographic_df["day"] == day).sum()
+        count = (demographic_df["weekday"] == day).sum()
         ax.bar(1, count, bottom=bottom)
         if count > 2:
             ax.text(1, bottom + count / 2, day_lookup[day], ha="center", va="center")
@@ -195,6 +195,29 @@ def weekday_stacked_bar(demographic_df, day_lookup):
     fig.savefig("mlm_pipeline/outputs/demographics/weekday_stacked.png")
 
 
+def first_weekday(demographic_df, day_lookup):
+    days = []
+    for pid in demographic_df["p_id"].unique():
+        first_day = demographic_df[demographic_df["p_id"] == pid]["weekday"].iloc[0]
+        days.append(first_day)
+
+    fig, ax = plt.subplots()
+    bins = np.arange(1, 8)
+    bins = np.concatenate([bins - 0.2, bins + 0.2])
+    bins = np.sort(bins)
+
+    ax.hist(days, bins=bins)
+    ax.set_xticks(
+        range(1, 8), [day_lookup[i] for i in range(1, 8)], rotation=30, ha="right"
+    )
+
+    ax.set_ylabel("Number of Participants")
+    ax.set_title("First day of data collection")
+
+    fig.tight_layout()
+    fig.savefig("mlm_pipeline/outputs/demographics/first_day.png")
+
+
 def weekdays_plot(demographic_df):
     day_lookup = {
         1: "Monday",
@@ -207,6 +230,7 @@ def weekdays_plot(demographic_df):
     }
     weekday_hist(demographic_df, day_lookup)
     weekday_stacked_bar(demographic_df, day_lookup)
+    first_weekday(demographic_df, day_lookup)
 
 
 def main():

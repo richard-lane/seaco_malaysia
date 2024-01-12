@@ -43,7 +43,7 @@ control <- glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e5))
 sex_model <- glmer(entry ~ day * sex + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
 plot_and_save(sex_model, "sex", "mlm_pipeline/outputs/sex_fit.png", list(`0` = "Male", `1` = "Female"))
 capture.output(summary(sex_model), file = "sex_model.txt")
-capture.output(confint(sex_model, parm = "beta_")["sex", ], file = "sex_model.txt", append = TRUE)
+# capture.output(confint(sex_model, parm = "beta_")["sex", ], file = "sex_model.txt", append = TRUE)
 
 ethnicity_model <- glmer(entry ~ day * ethnicity + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
 plot_and_save(ethnicity_model, "ethnicity", "mlm_pipeline/outputs/ethnicity_fit.png", list(`1` = "Ethnicity 1", `2` = "Ethnicity 2", `3` = "Ethnicity 3"))
@@ -60,6 +60,15 @@ capture.output(summary(school_model), file = "school_model.txt")
 weekend_model <- glmer(entry ~ day * is_weekend + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
 plot_and_save(weekend_model, "is_weekend", "mlm_pipeline/outputs/weekend_fit.png", list(`0` = "Weekday", `1` = "Weekend"))
 capture.output(summary(weekend_model), file = "weekend_model.txt")
+
+weekday_model <- glmer(entry ~ day * weekday + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
+plot_and_save(
+    weekday_model,
+    "weekday",
+    "mlm_pipeline/outputs/weekday_fit.png",
+    list(`1` = "Monday", `2` = "Tuesday", `3` = "Wednesday", `4` = "Thursday", `5` = "Friday", `6` = "Saturday", `7` = "Sunday")
+)
+capture.output(summary(weekday_model), file = "weekday_model.txt")
 
 ramadan_model <- glmer(entry ~ day * all_in_ramadan + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
 plot_and_save(ramadan_model, "all_in_ramadan", "mlm_pipeline/outputs/ramadan_fit.png", list(`0` = "Not Ramadan", `1` = "Ramadan"))
