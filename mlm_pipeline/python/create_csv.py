@@ -74,6 +74,13 @@ def main():
     # Whether each day was a weekend or weekday
     model_df["weekend"] = meal_info.index.dayofweek.isin({5, 6}).astype(int)
 
+    # What day of the week each participant started on
+    model_df["first_weekday"] = pd.NA
+    for p_id in model_df["p_id"].unique():
+        model_df.loc[model_df["p_id"] == p_id, "first_weekday"] = model_df.loc[
+            model_df["p_id"] == p_id, "weekday"
+        ].iloc[0]
+
     # How many days each participant spent in school
     model_df["over_2_days_in_school"] = (model_df["phyactq1"] > 2).astype(int)
 

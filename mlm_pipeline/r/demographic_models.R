@@ -62,10 +62,6 @@ school_model <- glmer(entry ~ day * over_2_days_in_school + (1 + day | p_id), da
 plot_and_save(school_model, "over_2_days_in_school", "mlm_pipeline/outputs/school_fit.png", list(`0` = "0-2 days", `1` = ">2 days"))
 capture.output(summary(school_model), file = "school_model.txt")
 
-weekend_model <- glmer(entry ~ day * is_weekend + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
-plot_and_save(weekend_model, "is_weekend", "mlm_pipeline/outputs/weekend_fit.png", list(`0` = "Weekday", `1` = "Weekend"))
-capture.output(summary(weekend_model), file = "weekend_model.txt")
-
 weekday_model <- glmer(entry ~ day * weekday + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
 plot_and_save(
     weekday_model,
@@ -74,6 +70,10 @@ plot_and_save(
     list(`1` = "Monday", `2` = "Tuesday", `3` = "Wednesday", `4` = "Thursday", `5` = "Friday", `6` = "Saturday", `7` = "Sunday")
 )
 capture.output(summary(weekday_model), file = "weekday_model.txt")
+
+start_day_model <- glmer(entry ~ day * first_weekday + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
+plot_and_save(start_day_model, "first_weekday", "mlm_pipeline/outputs/start_day_fit.png", list(`1` = "Monday", `2` = "Tuesday", `3` = "Wednesday", `4` = "Thursday", `5` = "Friday", `6` = "Saturday", `7` = "Sunday"))
+capture.output(summary(start_day_model), file = "start_day_model.txt")
 
 ramadan_model <- glmer(entry ~ day * all_in_ramadan + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
 plot_and_save(ramadan_model, "all_in_ramadan", "mlm_pipeline/outputs/ramadan_fit.png", list(`0` = "Not Ramadan", `1` = "Ramadan"))
