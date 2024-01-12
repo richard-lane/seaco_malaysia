@@ -78,3 +78,13 @@ capture.output(summary(weekday_model), file = "weekday_model.txt")
 ramadan_model <- glmer(entry ~ day * all_in_ramadan + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
 plot_and_save(ramadan_model, "all_in_ramadan", "mlm_pipeline/outputs/ramadan_fit.png", list(`0` = "Not Ramadan", `1` = "Ramadan"))
 capture.output(summary(ramadan_model), file = "ramadan_model.txt")
+
+# model_df$age_dob <- as.factor(model_df$age_dob)
+# age_dob_model <- glmer(entry ~ day * age_dob + (1 + day | p_id), data = model_df, family = binomial(link = "logit"), control = control)
+# plot_and_save(
+#     age_dob_model,
+#     "age_dob",
+#     "mlm_pipeline/outputs/age_dob_fit.png",
+#     list(8:"8", "9":"9", "10":"10", "11":"11", "12":"12", "13":"13", "14":"14", "15":"15", "16":"16", "17":"17", "18":"18")
+# )
+# capture.output(summary(age_dob_model), file = "age_dob_model.txt")

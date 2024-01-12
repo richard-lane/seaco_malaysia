@@ -63,6 +63,8 @@ def main():
         .set_index(model_df.index)
     )
 
+    model_df["age_dob"] = model_df["age_dob"].astype(int)
+
     # Convert sex to 1 or 0 (instead of 1 or 2)
     model_df["respondent_sex"] -= 1
 
