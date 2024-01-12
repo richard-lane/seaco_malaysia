@@ -13,7 +13,7 @@ def age_hist(demographic_df):
     fig, ax = plt.subplots()
 
     bins = np.arange(
-        np.min(demographic_df["age_dob"]), np.max(demographic_df["age_dob"])
+        np.min(demographic_df["age_dob"]), np.max(demographic_df["age_dob"] + 1)
     )
     bins = np.concatenate([bins - 0.2, bins + 0.2])
     bins = np.sort(bins)
@@ -39,7 +39,7 @@ def age_stacked_bar(demographic_df):
         bottom += count
 
     bottom = 0
-    for age in range(13, 18):
+    for age in range(13, 19):
         count = (demographic_df["age_dob"] == age).sum()
         ax.bar(1, count, bottom=bottom)
         ax.text(1, bottom + count / 2, age, ha="center", va="center")
@@ -48,6 +48,7 @@ def age_stacked_bar(demographic_df):
     ax.set_xticks((0, 1), ("7-12", "13-17"))
 
     ax.set_ylabel("Count")
+    ax.set_xlabel("Age group")
 
     fig.tight_layout()
     fig.savefig("mlm_pipeline/outputs/demographics/age_stacked.png")
@@ -99,8 +100,53 @@ def sex_plot(demographic_df):
     fig.savefig("mlm_pipeline/outputs/demographics/sexes.png")
 
 
-def school_plot():
-    """ """
+def school_hist(demographic_df):
+    fig, ax = plt.subplots()
+
+    bins = np.arange(0, 8)
+    bins = np.concatenate([bins - 0.2, bins + 0.2])
+    bins = np.sort(bins)
+
+    ax.hist(demographic_df["phyactq1"], bins=bins)
+    ax.set_ylabel("Count")
+    ax.set_xlabel("Number of days in school")
+
+    fig.tight_layout()
+    fig.savefig("mlm_pipeline/outputs/demographics/school_hist.png")
+
+
+def school_stacked_bar(demographic_df):
+    # Stacked bar plot
+    fig, ax = plt.subplots()
+
+    bottom = 0
+    for days in range(0, 3):
+        count = (demographic_df["phyactq1"] == days).sum()
+        ax.bar(0, count, bottom=bottom)
+        if count > 2:
+            ax.text(0, bottom + count / 2, days, ha="center", va="center")
+        bottom += count
+
+    bottom = 0
+    for days in range(3, 8):
+        count = (demographic_df["phyactq1"] == days).sum()
+        ax.bar(1, count, bottom=bottom)
+        if count > 2:
+            ax.text(1, bottom + count / 2, days, ha="center", va="center")
+        bottom += count
+
+    ax.set_xticks((0, 1), ("0-2", "2-7"))
+
+    ax.set_xlabel("Days in school")
+    ax.set_ylabel("Count")
+
+    fig.tight_layout()
+    fig.savefig("mlm_pipeline/outputs/demographics/school_stacked.png")
+
+
+def school_plot(demographic_df):
+    school_hist(demographic_df)
+    school_stacked_bar(demographic_df)
 
 
 def weekdays_plot():
@@ -121,6 +167,8 @@ def main():
     ethnicity_plot(entries_df)
 
     sex_plot(entries_df)
+
+    school_plot(entries_df)
 
 
 if __name__ == "__main__":
