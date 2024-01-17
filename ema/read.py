@@ -522,3 +522,13 @@ def n_days_in_school(*, subset: str = None) -> dict:
     return dict(
         zip(feasibility_df["residents_id"][keep], feasibility_df["phyactq1"][keep])
     )
+
+
+def ax6_summary():
+    """
+    Cleaned summary data for AX6 accelerometers
+
+    """
+    return pd.read_stata(
+        pathlib.Path(_userconf()["seaco_dir"]) / _conf()["ax6_summary"]
+    )
