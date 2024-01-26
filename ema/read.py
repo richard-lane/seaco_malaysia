@@ -532,3 +532,36 @@ def ax6_summary():
     return pd.read_stata(
         pathlib.Path(_userconf()["seaco_dir"]) / _conf()["ax6_summary"]
     )
+
+
+def ax6_day_summary(*, part: int):
+    """
+    day summary data for AX6 accelerometers
+
+    """
+    assert part in {2, 5}
+
+    return pd.read_csv(
+        pathlib.Path(_userconf()["seaco_dir"]) / _conf()[f"ax6_day_summary_pt{part}"]
+    )
+
+
+def ax6_person_summary(*, part: int):
+    """
+    person summary data for AX6 accelerometers
+
+    """
+    assert part in {2, 5}
+
+    return pd.read_csv(
+        pathlib.Path(_userconf()["seaco_dir"]) / _conf()[f"ax6_person_summary_pt{part}"]
+    )
+
+def ax6_data_quality():
+    """
+    Data quality report
+
+    """
+    return pd.read_csv(
+        pathlib.Path(_userconf()["seaco_dir"]) / _conf()["ax6_data_quality"]
+    )
