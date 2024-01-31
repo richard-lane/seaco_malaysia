@@ -17,3 +17,4 @@ ax6_day_summary_pt2: "SEACO data/SEACO-CH20 processed accelerometer/output_AX6 A
 ax6_person_summary_pt5: "SEACO data/SEACO-CH20 processed accelerometer/output_AX6 Activity Monitor/results/part5_daysummary_MM_L50M191.6V695.8_T5A5.csv"
 ax6_day_summary_pt5: "SEACO data/SEACO-CH20 processed accelerometer/output_AX6 Activity Monitor/results/part5_personsummary_MM_L50M191.6V695.8_T5A5.csv"
 ax6_data_quality: "SEACO data/SEACO-CH20 processed accelerometer/output_AX6 Activity Monitor/results/QC/data_quality_report.csv"
+smartwatch_dbs_dir: "SEACO data/Downloads/Smartwatch"
