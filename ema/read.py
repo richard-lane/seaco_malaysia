@@ -489,6 +489,8 @@ def add_timedelta(meal_info: pd.DataFrame) -> pd.DataFrame:
         meal_info.index.to_series() - meal_info["actualdateofdistribution1st"]
     )
 
+    assert (meal_info["residents_id"] == meal_info["p_id"]).all()
+
     return meal_info.drop(
         columns=["Datetime", "residents_id", "actualdateofdistribution1st"]
     )
