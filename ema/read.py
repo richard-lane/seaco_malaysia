@@ -2,13 +2,17 @@
 Helpers for reading data from disk
 
 """
+
+import os
 import yaml
+import shutil
 import pathlib
 from functools import cache
 
-import numpy as np
+import sqlite3
 import pandas as pd
 from openmovement.load import CwaData
+from tqdm import tqdm
 
 from . import util, parse, clean
 
@@ -559,6 +563,7 @@ def ax6_person_summary(*, part: int):
         pathlib.Path(_userconf()["seaco_dir"]) / _conf()[f"ax6_person_summary_pt{part}"]
     )
 
+
 def ax6_data_quality():
     """
     Data quality report
@@ -567,3 +572,31 @@ def ax6_data_quality():
     return pd.read_csv(
         pathlib.Path(_userconf()["seaco_dir"]) / _conf()["ax6_data_quality"]
     )
+
+
+def copy_battery_files():
+    """
+    Copy the smartwatch databases containing battery level to a local directory so I
+    can read them etc
+
+    """
+    # Create an output file directory
+    battery_dir = (pathlib.Path(__file__).parents[1] / "data" / "battery_dbs").resolve()
+    if not battery_dir.is_dir():
+        battery_dir.mkdir(parents=True)
+
+    # Find all the files
+    dirname = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["smartwatch_dbs_dir"]
+    assert dirname.exists()
+
+    # Recurse into all "Week X" directories, extracting all .db files
+    source_files = [file for file in dirname.glob("Week*/**/*.db")]
+    dest_files = [os.path.join(battery_dir, file.name) for file in source_files]
+
+    # Check that they don't all exist
+    if not all([os.path.isfile(dest) for dest in dest_files]):
+        for source, dest in tqdm(
+            zip(source_files, dest_files), total=len(source_files)
+        ):
+            assert not os.path.isfile(dest), f"Duplicate name {source}"
+            shutil.copyfile(source, dest)
