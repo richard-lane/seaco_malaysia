@@ -606,6 +606,8 @@ def battery_lvl_df():
     """
     Dataframe of battery level stuff
 
+    Removes battery level with deltas below 0 and 7
+
     """
     battery_dir = (pathlib.Path(__file__).parents[1] / "data" / "battery_dbs").resolve()
     dirname = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["smartwatch_dbs_dir"]
@@ -644,4 +646,16 @@ def battery_lvl_df():
 
         conn.close()
 
-    return pd.concat(dfs)
+    battery_df = pd.concat(dfs)
+
+    # Add timedelta
+    battery_df["p_id"] = battery_df["p_id"].astype(int)
+    battery_df = battery_df.set_index("Datetime")
+    battery_df = add_timedelta(battery_df)
+
+    # Remove battery level with deltas below 0 and 7
+    battery_df = battery_df[battery_df["delta"].dt.days >= 1]
+    battery_df = battery_df[battery_df["delta"].dt.days <= 7]
+
+    return battery_df
+
