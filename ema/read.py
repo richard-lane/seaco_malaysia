@@ -636,8 +636,6 @@ def battery_lvl_df() -> pd.DataFrame:
 
     Removes battery level with deltas below 0 and 7
 
-    :param keep_catchups: whether to keep catchup entries
-
     """
     battery_dir = (pathlib.Path(__file__).parents[1] / "data" / "battery_dbs").resolve()
     dirname = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["smartwatch_dbs_dir"]
@@ -704,10 +702,11 @@ def battery_lvl_df() -> pd.DataFrame:
         how="left",
     )
 
-    # Add Ramadan info
+    # Add Ramadan + early stopping info
     cleaned_sw = clean.cleaned_smartwatch(keep_catchups=False)
     battery_df = battery_df.merge(
-        cleaned_sw[["p_id", "all_in_ramadan", "any_in_ramadan"]], on="p_id"
+        cleaned_sw[["p_id", "all_in_ramadan", "any_in_ramadan", "early_stop"]],
+        on="p_id",
     )
 
     return battery_df

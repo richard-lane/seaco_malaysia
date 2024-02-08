@@ -2,6 +2,7 @@
 Data cleaning stuff
 
 """
+
 import warnings
 
 import numpy as np
@@ -352,6 +353,19 @@ def clean_meal_info(
 
     # Whether the participants period was within Ramadan
     ramadan_info = _ramadan_info(retval, verbose=verbose)
+
+    # Whether the participant's last positive entry was on day 7
+    last_entry = {
+        p_id: retval[
+            (retval["p_id"] == p_id)
+            & (retval["meal_type"].isin({"Meal", "Drink", "Snack", "No food/drink"}))
+        ]["delta"].dt.days.max()
+        for p_id in retval["p_id"].unique()
+    }
+    retval["early_stop"] = False
+    for pid in retval["p_id"].unique():
+        if last_entry[pid] < 7:
+            retval.loc[retval["p_id"] == pid, "early_stop"] = True
 
     # Need to do this to preserve the index
     retval["Datetime"] = retval.index
