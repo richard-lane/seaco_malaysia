@@ -692,4 +692,22 @@ def battery_lvl_df() -> pd.DataFrame:
     battery_df["charges"] = battery_df["p_id"].map(charges)
     battery_df["discharges"] = battery_df["p_id"].map(discharges)
 
+    # Add demographic info
+    demographic_df = full_questionnaire()
+    demographic_df = demographic_df[demographic_df["respondent_status"] == 1]
+    battery_df = battery_df.merge(
+        demographic_df[
+            ["respondent_sex", "respondent_ethnicity", "age_dob", "residents_id"]
+        ],
+        left_on="p_id",
+        right_on="residents_id",
+        how="left",
+    )
+
+    # Add Ramadan info
+    cleaned_sw = clean.cleaned_smartwatch(keep_catchups=False)
+    battery_df = battery_df.merge(
+        cleaned_sw[["p_id", "all_in_ramadan", "any_in_ramadan"]], on="p_id"
+    )
+
     return battery_df
