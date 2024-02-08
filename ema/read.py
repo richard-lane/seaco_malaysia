@@ -600,3 +600,48 @@ def copy_battery_files():
         ):
             assert not os.path.isfile(dest), f"Duplicate name {source}"
             shutil.copyfile(source, dest)
+
+
+def battery_lvl_df():
+    """
+    Dataframe of battery level stuff
+
+    """
+    battery_dir = (pathlib.Path(__file__).parents[1] / "data" / "battery_dbs").resolve()
+    dirname = pathlib.Path(_userconf()["seaco_dir"]) / _conf()["smartwatch_dbs_dir"]
+    source_files = [file for file in dirname.glob("Week*/**/*.db")]
+    dest_files = [os.path.join(battery_dir, file.name) for file in source_files]
+    dfs = []
+
+    for path in tqdm(dest_files):
+        # Get the p_id from the path
+        path = pathlib.Path(path)
+        p_id = path.name.split("_")[1]
+
+        # Open the db
+        conn = sqlite3.connect(path, uri=True)
+
+        # Get the battery level
+        try:
+            df = pd.read_sql_query("SELECT * FROM Event;", conn)
+
+        except pd.io.sql.DatabaseError as e:
+            print(f"{path} failed with {e}")
+            continue
+
+        # Only keep battery level rows
+        df = df[df["eventdesc"].str.startswith("B")]
+
+        # Add a new column for timestamp
+        df["Datetime"] = pd.to_datetime(
+            df["eventdate"] + " " + df["eventtime"], format="%Y-%m-%d %H:%M:%S"
+        )
+        df["battery_lvl"] = df["eventdesc"].str.split(" ").str[-1].str[:-1].astype(int)
+
+        df["p_id"] = p_id
+
+        dfs.append(df[["p_id", "Datetime", "battery_lvl"]])
+
+        conn.close()
+
+    return pd.concat(dfs)
