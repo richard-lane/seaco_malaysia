@@ -10,6 +10,7 @@ import pathlib
 from functools import cache
 
 import sqlite3
+import numpy as np
 import pandas as pd
 from openmovement.load import CwaData
 from tqdm import tqdm
@@ -602,11 +603,40 @@ def copy_battery_files():
             shutil.copyfile(source, dest)
 
 
-def battery_lvl_df():
+def _charge_and_discharges(battery_df: pd.DataFrame) -> tuple[dict, dict]:
+    """
+    Number of charge/discharge periods per participant
+
+    """
+    charges = {}
+    de_charges = {}
+    for p_id, group in battery_df.groupby("p_id"):
+        assert group["delta"].is_monotonic_increasing
+
+        # Find the sign for the battery level diff
+        diff_sign = (
+            np.sign(group["battery_lvl"].diff())
+            .replace(0, pd.NA)
+            .infer_objects(copy=False)
+        )
+
+        # Create a new series where the sign changes, ignoring zero differences
+        sign_change = (diff_sign.diff().ne(0) & diff_sign.ne(0)).cumsum()
+
+        # Count the number of charge and de-charge periods
+        charges[p_id] = (diff_sign > 0).groupby(sign_change).sum().astype(bool).sum()
+        de_charges[p_id] = (diff_sign < 0).groupby(sign_change).sum().astype(bool).sum()
+
+    return charges, de_charges
+
+
+def battery_lvl_df() -> pd.DataFrame:
     """
     Dataframe of battery level stuff
 
     Removes battery level with deltas below 0 and 7
+
+    :param keep_catchups: whether to keep catchup entries
 
     """
     battery_dir = (pathlib.Path(__file__).parents[1] / "data" / "battery_dbs").resolve()
@@ -657,5 +687,9 @@ def battery_lvl_df():
     battery_df = battery_df[battery_df["delta"].dt.days >= 1]
     battery_df = battery_df[battery_df["delta"].dt.days <= 7]
 
-    return battery_df
+    # Add the number of charge/discharge periods
+    charges, discharges = _charge_and_discharges(battery_df)
+    battery_df["charges"] = battery_df["p_id"].map(charges)
+    battery_df["discharges"] = battery_df["p_id"].map(discharges)
 
+    return battery_df
