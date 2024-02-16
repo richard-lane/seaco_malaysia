@@ -374,3 +374,67 @@ def clean_meal_info(
 
 def cleaned_smartwatch(*, keep_catchups: bool) -> pd.DataFrame:
     return clean_meal_info(read.all_meal_info(), keep_catchups=keep_catchups)
+
+
+def clean_meal_info_keepday0(
+    meal_df: pd.DataFrame, *, keep_catchups: bool, verbose: bool = False
+) -> pd.DataFrame:
+    """
+    Clean the provided meal info dataframe.
+
+    Returns a dataframe of meal time info that has:
+        - had duplicates removed (as defined above)
+        - had events before the participant watch distribution date removed
+        - had events on the watch distribution date removed
+        - had events more than 7 days after the distribution date removed
+
+    :param meal_df: dataframe of meal info
+    :param keep_catchups: whether to keep catchup markers and entries
+    :param verbose: extra print information
+
+    :returns: a cleaned copy of the dataframe
+
+    """
+    retval = meal_df.copy()
+
+    retval = retval.sort_index(inplace=False)
+
+    # Find early entries
+    retval = retval[retval["delta"].dt.days >= 0]
+
+    # Fine late entries
+    retval = retval[retval["delta"].dt.days <= 7]
+
+    # Find duplicates
+    retval = retval[~duplicates(retval)]
+
+    # Optionally remove catchups
+    if not keep_catchups:
+        retval = remove_catchups(retval)
+
+    # Add Ramadan info
+    # Whether each entry was within Ramadan
+    retval["entry_in_ramadan"] = util.in_ramadan_2022(retval.index, verbose=verbose)
+
+    # Whether the participants period was within Ramadan
+    ramadan_info = _ramadan_info(retval, verbose=verbose)
+
+    # Whether the participant's last positive entry was on day 7
+    last_entry = {
+        p_id: retval[
+            (retval["p_id"] == p_id)
+            & (retval["meal_type"].isin({"Meal", "Drink", "Snack", "No food/drink"}))
+        ]["delta"].dt.days.max()
+        for p_id in retval["p_id"].unique()
+    }
+    retval["early_stop"] = False
+    for pid in retval["p_id"].unique():
+        if last_entry[pid] < 7:
+            retval.loc[retval["p_id"] == pid, "early_stop"] = True
+
+    # Need to do this to preserve the index
+    retval["Datetime"] = retval.index
+    return retval.merge(ramadan_info, on="p_id").set_index("Datetime").sort_index()
+
+def cleaned_smartwatch_keepday0(*, keep_catchups: bool) -> pd.DataFrame:
+    return clean_meal_info_keepday0(read.all_meal_info(), keep_catchups=keep_catchups)
