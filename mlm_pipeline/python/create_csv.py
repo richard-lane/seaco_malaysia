@@ -3,6 +3,7 @@ Create a CSV file holding the relevant, cleaned data from file;
 ready to run a multi-level model
 
 """
+
 import sys
 import pathlib
 import numpy as np
@@ -45,6 +46,8 @@ def main():
             "respondent_ethnicity",
             "age_dob",
             "phyactq1",
+            "smart1_10to17",
+            "smart1_7to9",
         ]
     ]
     model_df = (
@@ -52,6 +55,12 @@ def main():
         .merge(demographic_df, left_on="p_id", right_on="residents_id", how="left")
         .set_index(model_df.index)
     )
+
+    # Keep only participants who wore the smartwatch
+    keep = (model_df["smart1_10to17"] == 1) | (model_df["smart1_7to9"] == 1)
+    keep_participants = model_df.loc[keep, "p_id"].unique()
+    print(len(keep_participants))
+    model_df = model_df[keep]
 
     model_df["age_dob"] = model_df["age_dob"].astype(int)
 
@@ -62,7 +71,7 @@ def main():
     model_df["age_group"] = (model_df["age_dob"] > 12).astype(int)
 
     # Whether each day was a weekend or weekday
-    model_df["weekend"] = meal_info.index.dayofweek.isin({5, 6}).astype(int)
+    model_df["weekend"] = model_df["Datetime"].dt.dayofweek.isin({5, 6}).astype(int)
 
     # What day of the week each participant started on
     model_df["first_weekday"] = pd.NA
@@ -83,7 +92,7 @@ def main():
 
     # Whether each entry was a reponse or not
     model_df["entry"] = (
-        meal_info["meal_type"]
+        model_df["meal_type"]
         .isin({"Meal", "Drink", "Snack", "No food/drink"})
         .astype(int)
     )
